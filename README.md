@@ -1,2 +1,2 @@
-# RiRender
-A little pbr renderer.
+# Rider
+This is a little pbr renderer.

@@ -26,9 +26,10 @@ file(GLOB source_files CONFIGURE_DEPENDS
 	src/materials/*
 	src/shapes/*)
 
-add_library(Rider_lib STATIC ${source_files})
+# add_library(Rider_lib STATIC ${source_files})
 add_executable(Rider src/main.cpp)
-target_link_libraries(Rider PUBLIC Rider_lib)
+target_sources(Rider PUBLIC ${source_files})
+# target_link_libraries(Rider PUBLIC Rider_lib)
 
 find_package(TBB REQUIRED)
 target_link_libraries(Rider PUBLIC TBB::tbb)

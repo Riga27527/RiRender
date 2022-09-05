@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <cmath>
 #include <tbb/tick_count.h>
 
 #define RIGA_NAMESPACE_BEGIN namespace riga {

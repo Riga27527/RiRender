@@ -32,6 +32,16 @@ struct Mat4x4f{
 					return true;
 		return false;
 	}
+	float* const operator[](size_t i){
+		if(i<0 || i>3)
+			throw std::out_of_range("Mat4x4f out of range!");
+		return m[i];
+	}
+	const float* operator[](size_t i) const{
+		if(i<0 || i>3)
+			throw std::out_of_range("Mat4x4f out of range!");
+		return m[i];
+	}
 	bool isIdentity() const{
 		return (m[0][0] == 1.f && m[0][1] == 0.f && m[0][2] == 0.f &&
                 m[0][3] == 0.f && m[1][0] == 0.f && m[1][1] == 1.f &&
@@ -62,21 +72,73 @@ class Transform{
 public:
 	Transform(){}
 	Transform(const Mat4x4f& mat) : m(mat), mInv(Inverse(mat)){}
-	Transform(const float mat[4][4]) : m(Mat4x4f(mat)), mInv(Inverse(m)){}
+	Transform(float mat[4][4]) : m(Mat4x4f(mat)), mInv(Inverse(m)){}
 	Transform(const Mat4x4f& mat, const Mat4x4f& matInv) : m(mat), mInv(matInv){}
 
 	bool operator==(const Transform& t) const{
-		return m == t.m && mInv = t.mInv;
+		return (m == t.m) && (mInv == t.mInv);
 	}
 	bool operator!=(const Transform& t) const{
-		return m != t.m || mInv != t.mInv;
+		return (m != t.m) || (mInv != t.mInv);
 	}
 	bool isIdentity() const{
 		return m.isIdentity();
+	}
+	bool hasScale() const{
+		float la = (*this)(Vec3f(1.0f, 0.f, 0.f)).lengthSquared();
+		float lb = (*this)(Vec3f(0.f, 1.0f, 0.f)).lengthSquared();
+		float lc = (*this)(Vec3f(0.f, 0.f, 1.0f)).lengthSquared();
+		return (la < 0.999f || la > 1.001f) || (lb < 0.999f || lb > 1.001f) || (lc < 0.999f || lc > 1.001f);
+	}
+	const Mat4x4f& getMatrix() const{
+		return m;
+	}
+	const Mat4x4f& getInverseMatrix() const{
+		return mInv;
+	}
+	template <class T>
+	Vec3<T> operator()(const Vec3<T>& v) const{
+		return Vec3<T>(
+			m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+			m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+			m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]
+			);
+	}
+	template <class T>
+	Point3<T> operator()(const Point3<T>& p) const{
+		T x = m[0][0] * p[0] + m[0][1] * p[1] + m[0][2] * p[2] + m[0][3];
+		T y = m[1][0] * p[0] + m[1][1] * p[1] + m[1][2] * p[2] + m[1][3];
+		T z = m[2][0] * p[0] + m[2][1] * p[1] + m[2][2] * p[2] + m[2][3];
+		T w = m[3][0] * p[0] + m[3][1] * p[1] + m[3][2] * p[2] + m[3][3];
+		if(w == 0){
+			std::cout << "Transform with point w == 0!!!\n";
+			return Point3<T>(x, y, z);
+		}
+		return Point3<T>(x, y, z) / w;
+	}
+	template <class T>
+	Normal3<T> operator()(const Normal3<T>& n) const{
+		return Normal3<T>(
+			m[0][0] * n[0] + m[0][1] * n[1] + m[0][2] * n[2],
+			m[1][0] * n[0] + m[1][1] * n[1] + m[1][2] * n[2],
+			m[2][0] * n[0] + m[2][1] * n[1] + m[2][2] * n[2]
+			);		
 	}
 private:
 	Mat4x4f m, mInv;
 };
 
+std::ostream& operator<<(std::ostream os, const Transform& t);
+
+Transform Translate(const Vec3f& v);
+Transform Scale(const Vec3f& v);
+Transform Scale(float x, float y, float z);
+Transform RotateX(float theta);
+Transform RotateY(float theta);
+Transform RotateX(float theta);
+Transform Rotate(float theta, const Vec3f& axis);
+Transform LookAt(const Point3f& pos, const Point3f& focus, const Vec3f& up);
+Transform Orthographic(float znear, float zfar);
+Transform Perspective(float fov, float znear, float zfar);
 
 RIGA_NAMESPACE_END

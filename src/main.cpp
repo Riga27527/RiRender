@@ -28,9 +28,9 @@ int main(int argc, char const *argv[])
 	// std::cout << v1.normalized() << std::endl;
 	// std::cout << v1.Length() << std::endl;
 
-	Vec3<float> v3{5.0f, 6.0f, 7.0f};
-	Normal3<float> v4{-3.0f, -4.0f, -5.0f};
-	Vec2<float> v5{3.0, 4.0};
+	// Vec3<float> v3{5.0f, 6.0f, 7.0f};
+	// Normal3<float> v4{-3.0f, -4.0f, -5.0f};
+	// Vec2<float> v5{3.0, 4.0};
 
 	// std::cout << Normalize(v3) << std::endl;
 	// std::cout << v3.normalized() << std::endl;
@@ -44,11 +44,22 @@ int main(int argc, char const *argv[])
 	// std::cout << Permute(p1, 1, 2, 0) << std::endl;
 	// std::cout << Permute(v5, 1, 0) << std::endl;
 
-	std::cout << v4.dot(v3) << std::endl;
-	v4.faceForward(v3);
-	std::cout << v4 << std::endl;
+	// std::cout << v4.dot(v3) << std::endl;
+	// v4.faceForward(v3);
+	// std::cout << v4 << std::endl;
 
-	Mat4x4f mat;
-	std::cout << mat << std::endl;	
+	Mat4x4f mat = Mat4x4f::identity();
+	mat[1][1] = 2.f;
+	// std::cout << mat[1][1] << std::endl;	
+
+	Transform trans(Mat4x4f::identity());
+	std::cout << trans.hasScale() << std::endl;
+
+	Transform trans2(mat);
+	std::cout << trans2.hasScale() << std::endl;
+	// trans2.m[1][1] = 1.f;
+	// trans2.m[0][2] = 3.f;
+	// std::cout << trans2.hasScale() << std::endl;
+
 	return 0;
 }

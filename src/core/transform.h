@@ -31,7 +31,15 @@ struct Mat4x4f{
 				if(m[i][j] != mat.m[i][j])
 					return true;
 		return false;
-	}	
+	}
+	bool isIdentity() const{
+		return (m[0][0] == 1.f && m[0][1] == 0.f && m[0][2] == 0.f &&
+                m[0][3] == 0.f && m[1][0] == 0.f && m[1][1] == 1.f &&
+                m[1][2] == 0.f && m[1][3] == 0.f && m[2][0] == 0.f &&
+                m[2][1] == 0.f && m[2][2] == 1.f && m[2][3] == 0.f &&
+                m[3][0] == 0.f && m[3][1] == 0.f && m[3][2] == 0.f &&
+                m[3][3] == 1.f);
+	}
 	static Mat4x4f identity(){
 		Mat4x4f mat;
         mat.m[0][0] = mat.m[1][1] = mat.m[2][2] = mat.m[3][3] = 1.f;
@@ -48,5 +56,27 @@ Mat4x4f Transpose(const Mat4x4f& mat);
 Mat4x4f Inverse(const Mat4x4f& m);
 Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2);
 std::ostream& operator<<(std::ostream& os, const Mat4x4f& mat);
+
+
+class Transform{
+public:
+	Transform(){}
+	Transform(const Mat4x4f& mat) : m(mat), mInv(Inverse(mat)){}
+	Transform(const float mat[4][4]) : m(Mat4x4f(mat)), mInv(Inverse(m)){}
+	Transform(const Mat4x4f& mat, const Mat4x4f& matInv) : m(mat), mInv(matInv){}
+
+	bool operator==(const Transform& t) const{
+		return m == t.m && mInv = t.mInv;
+	}
+	bool operator!=(const Transform& t) const{
+		return m != t.m || mInv != t.mInv;
+	}
+	bool isIdentity() const{
+		return m.isIdentity();
+	}
+private:
+	Mat4x4f m, mInv;
+};
+
 
 RIGA_NAMESPACE_END

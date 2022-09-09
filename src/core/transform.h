@@ -59,14 +59,14 @@ struct Mat4x4f{
         mat.m[3][0] = mat.m[3][1] = mat.m[3][2] = 0.f;
         return mat;
 	}
+	friend std::ostream& operator<<(std::ostream& os, const Mat4x4f& mat);
+
 	float m[4][4] = {0};
 };
 
 Mat4x4f Transpose(const Mat4x4f& mat);
 Mat4x4f Inverse(const Mat4x4f& m);
 Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2);
-std::ostream& operator<<(std::ostream& os, const Mat4x4f& mat);
-
 
 class Transform{
 public:
@@ -80,6 +80,9 @@ public:
 	}
 	bool operator!=(const Transform& t) const{
 		return (m != t.m) || (mInv != t.mInv);
+	}
+	Transform operator*(const Transform& t) const{
+		return Transform(Mul(m, t.m), Mul(t.mInv, mInv));
 	}
 	bool isIdentity() const{
 		return m.isIdentity();
@@ -124,18 +127,17 @@ public:
 			m[2][0] * n[0] + m[2][1] * n[1] + m[2][2] * n[2]
 			);		
 	}
+	friend std::ostream& operator<<(std::ostream& os, const Transform& t);
 private:
 	Mat4x4f m, mInv;
 };
-
-std::ostream& operator<<(std::ostream os, const Transform& t);
 
 Transform Translate(const Vec3f& v);
 Transform Scale(const Vec3f& v);
 Transform Scale(float x, float y, float z);
 Transform RotateX(float theta);
 Transform RotateY(float theta);
-Transform RotateX(float theta);
+Transform RotateZ(float theta);
 Transform Rotate(float theta, const Vec3f& axis);
 Transform LookAt(const Point3f& pos, const Point3f& focus, const Vec3f& up);
 Transform Orthographic(float znear, float zfar);

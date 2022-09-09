@@ -83,4 +83,125 @@ Mat4x4f Inverse(const Mat4x4f& m){
     return Mat4x4f(minv);
 }
 
+std::ostream& operator<<(std::ostream& os, const Transform& t){
+	os << "t = \n" << t.m << ", \ninv = \n" << t.mInv;
+	return os;
+}
+
+Transform Translate(const Vec3f& v){
+	Mat4x4f m(1.f, 0.f, 0.f, v.x, 
+			  0.f, 1.f, 0.f, v.y,
+			  0.f, 0.f, 1.f, v.z,
+			  0.f, 0.f, 0.f, 1.f);
+	Mat4x4f mInv(1.f, 0.f, 0.f, -v.x, 
+			  	 0.f, 1.f, 0.f, -v.y,
+			  	 0.f, 0.f, 1.f, -v.z,
+			  	 0.f, 0.f, 0.f, 1.f);
+	return Transform(m, mInv);
+}
+
+Transform Scale(const Vec3f& v){
+	Mat4x4f m(v.x, 0.f, 0.f, 0.f,
+			  0.f, v.y, 0.f, 0.f,
+			  0.f, 0.f, v.z, 0.f,
+			  0.f, 0.f, 0.f, 1.f);
+	Mat4x4f mInv(v.x, 0.f, 0.f, 0.f,
+			  0.f, v.y, 0.f, 0.f,
+			  0.f, 0.f, v.z, 0.f,
+			  0.f, 0.f, 0.f, 1.f);	
+	return Transform(m, mInv);
+}
+
+Transform Scale(float x, float y, float z){
+	return Scale(Vec3f(x, y, z));
+}
+
+Transform RotateX(float theta){
+	float cosTheta = std::cos(Radians(theta));
+	float sinTheta = std::sin(Radians(theta));
+	Mat4x4f m(1.f, 		 0.f,  0.f, 	  0.f,
+			  0.f,  cosTheta,  -sinTheta, 0.f,
+			  0.f,  sinTheta,  cosTheta,  0.f,
+			  0.f,		 0.f,  0.f, 	  1.f);
+	return Transform(m, Transpose(m));
+}
+
+Transform RotateY(float theta){
+	float cosTheta = std::cos(Radians(theta));
+	float sinTheta = std::sin(Radians(theta));
+	Mat4x4f m(cosTheta,  0.f,  sinTheta, 0.f,
+			  0.f, 		 1.f,  0.f, 	 0.f,
+			  -sinTheta, 0.f,  cosTheta, 0.f,
+			  0.f,		 0.f,  0.f, 	 1.f);
+	return Transform(m, Transpose(m));
+}
+
+Transform RotateZ(float theta){
+	float cosTheta = std::cos(Radians(theta));
+	float sinTheta = std::sin(Radians(theta));
+	Mat4x4f m(cosTheta,  -sinTheta, 0.f,   0.f,
+			  sinTheta,	  cosTheta, 0.f,   0.f,
+			  0.f, 		 0.f,  		1.f,   0.f,
+			  0.f,		 0.f,  		0.f,   1.f);
+	return Transform(m, Transpose(m));
+}
+
+Transform Rotate(float theta, const Vec3f& axis){
+    Vec3f a = Normalize(axis);
+    float sinTheta = std::sin(Radians(theta));
+    float cosTheta = std::cos(Radians(theta));
+    Mat4x4f m;
+    // Compute rotation of first basis vector
+    m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;
+    m[0][1] = a.x * a.y * (1 - cosTheta) - a.z * sinTheta;
+    m[0][2] = a.x * a.z * (1 - cosTheta) + a.y * sinTheta;
+    m[0][3] = 0;
+
+    // Compute rotations of second and third basis vectors
+    m[1][0] = a.x * a.y * (1 - cosTheta) + a.z * sinTheta;
+    m[1][1] = a.y * a.y + (1 - a.y * a.y) * cosTheta;
+    m[1][2] = a.y * a.z * (1 - cosTheta) - a.x * sinTheta;
+    m[1][3] = 0;
+
+    m[2][0] = a.x * a.z * (1 - cosTheta) - a.y * sinTheta;
+    m[2][1] = a.y * a.z * (1 - cosTheta) + a.x * sinTheta;
+    m[2][2] = a.z * a.z + (1 - a.z * a.z) * cosTheta;
+    m[2][3] = 0;
+    return Transform(m, Transpose(m));
+}
+
+Transform LookAt(const Point3f& pos, const Point3f& focus, const Vec3f& up){
+	Mat4x4f camera2World;
+	camera2World[0][3] = pos.x;
+	camera2World[1][3] = pos.y;
+	camera2World[2][3] = pos.z;
+	camera2World[3][3] = 1.f;
+
+	Vec3f dir = Normalize(focus - pos);
+	Vec3f right = Cross(Normalize(up), dir);
+	if(right.lengthSquared() == 0)
+		throw("up vector and view vector pass to LookAt function are in the same direction!!!");
+	else
+		right.normalized();
+	Vec3f newUp = Normalize(Cross(dir, right));
+
+	camera2World[0][0] = right.x;
+	camera2World[1][0] = right.y;
+	camera2World[2][0] = right.z;
+
+	camera2World[0][1] = newUp.x;
+	camera2World[1][1] = newUp.y;
+	camera2World[2][1] = newUp.z;
+	
+	camera2World[0][2] = dir.x;
+	camera2World[1][2] = dir.y;
+	camera2World[2][2] = dir.z;
+
+	return Transform(Inverse(camera2World), camera2World);
+}
+
+Transform Orthographic(float znear, float zfar);
+
+Transform Perspective(float fov, float znear, float zfar);
+
 RIGA_NAMESPACE_END

@@ -48,18 +48,20 @@ int main(int argc, char const *argv[])
 	// v4.faceForward(v3);
 	// std::cout << v4 << std::endl;
 
-	Mat4x4f mat = Mat4x4f::identity();
-	mat[1][1] = 2.f;
-	// std::cout << mat[1][1] << std::endl;	
+	// Mat4x4f mat = Mat4x4f::identity();
+	// mat[1][1] = 2.f;
+	// // std::cout << mat[1][1] << std::endl;	
 
-	Transform trans(Mat4x4f::identity());
-	std::cout << trans.hasScale() << std::endl;
+	// Transform trans(Mat4x4f::identity());
+	// std::cout << trans.hasScale() << std::endl;
 
-	Transform trans2(mat);
-	std::cout << trans2.hasScale() << std::endl;
+	// Transform trans2(mat);
+	// std::cout << trans2.hasScale() << std::endl;
 	// trans2.m[1][1] = 1.f;
 	// trans2.m[0][2] = 3.f;
 	// std::cout << trans2.hasScale() << std::endl;
 
+	auto t = LookAt(Point3f(5.f, 0.f, 0.f), Point3f(5.f, 0.f, -10.f), Vec3f(0.f, 1.0f, 0.f));
+	std::cout << t << std::endl;
 	return 0;
 }

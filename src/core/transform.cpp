@@ -200,8 +200,19 @@ Transform LookAt(const Point3f& pos, const Point3f& focus, const Vec3f& up){
 	return Transform(Inverse(camera2World), camera2World);
 }
 
-Transform Orthographic(float znear, float zfar);
+Transform Orthographic(float znear, float zfar){
+	return Scale(1.f, 1.f, 1.f / (zfar - znear)) * Translate(Vec3f(0.f, 0.f, -znear));
+}
 
-Transform Perspective(float fov, float znear, float zfar);
+Transform Perspective(float fov, float znear, float zfar){
+	float A = zfar / (zfar - znear), B = -zfar * znear / (zfar - znear);
+	Mat4x4f persp(1.f, 0.f, 0.f, 0.f,
+				  0.f, 1.f, 0.f, 0.f,
+				  0.f, 0.f, A, 	 B,
+				  0.f, 0.f, 1.f, 0.f);
+
+	float invTan = 1.f / std::tan(Radians(fov) * 0.5f);
+	return Scale(invTan, invTan, 1.f) * Transform(persp);
+}
 
 RIGA_NAMESPACE_END

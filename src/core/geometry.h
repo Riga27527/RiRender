@@ -117,6 +117,11 @@ public:
 		return i==0 ? x : y;
 	}
 	
+	friend std::ostream& operator<<(std::ostream& os, const Vec2<T>& v){
+		os << "[ " << v.x << ", " << v.y << " ]";
+		return os;
+	}
+
 	float lengthSquared() const {return x*x + y*y; }
 	float length() const {return std::sqrt(lengthSquared()); }	
 	bool hasNaN() const {return (isNaN(x) || isNaN(y)); }
@@ -129,16 +134,10 @@ public:
 		y *= inv;
 		return *this;
 	}
-
 	// public data
 	T x = 0 , y = 0;
 };
 
-template <class T>
-std::ostream& operator<<(std::ostream& os, const Vec2<T>& v){
-	os << "[ " << v.x << ", " << v.y << " ]";
-	return os;
-}
 
 template <class T>
 class Vec3{
@@ -230,7 +229,11 @@ public:
 		}
 		return i==0 ? x : (i==1 ? y : z);
 	}
-	
+	friend std::ostream& operator<<(std::ostream& os, const Vec3<T>& v){
+		os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
+		return os;
+	}
+
 	float lengthSquared() const {return x*x + y*y + z*z; }
 	float length() const {return std::sqrt(lengthSquared()); }	
 	bool hasNaN() const {return (isNaN(x) || isNaN(y) || isNaN(z)); }
@@ -270,12 +273,6 @@ public:
 
 	T x = 0, y = 0, z = 0;
 };
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const Vec3<T>& v){
-	os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
-	return os;
-}
 
 template <class T>
 class Point2{
@@ -399,17 +396,16 @@ public:
 		return i==0 ? x : y;
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const Point2<T>& v){
+		os << "[ " << v.x << ", " << v.y << " ]";
+		return os;
+	}
+	
 	bool hasNaN() const {return (isNaN(x) || isNaN(y)); }
 
 	// public data
 	T x = 0 , y = 0;
 };
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const Point2<T>& v){
-	os << "[ " << v.x << ", " << v.y << " ]";
-	return os;
-}
 
 template <class T>
 class Point3{
@@ -465,7 +461,7 @@ public:
 		return *this;
 	}
 
-	Point3<T> operator+(const Vec3<T>& vec){
+	Point3<T> operator+(const Vec3<T>& vec) const{
 		return Point3(x+vec.x, y+vec.y, z+vec.z);
 	}
 
@@ -482,7 +478,7 @@ public:
 		return *this;
 	}
 
-	Point3<T> operator-(const Vec3<T>& vec){
+	Point3<T> operator-(const Vec3<T>& vec) const{
 		return Point3(x-vec.x, y-vec.y, z-vec.z);
 	}
 
@@ -540,17 +536,17 @@ public:
 		return i==0 ? x : (i==1 ? y : z);
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const Point3<T>& v){
+		os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
+		return os;
+	}
+
 	bool hasNaN() const {return (isNaN(x) || isNaN(y) || isNaN(z)); }
 
 	// public data
 	T x = 0 , y = 0, z = 0;
 };
 
-template <class T>
-std::ostream& operator<<(std::ostream& os, const Point3<T>& v){
-	os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
-	return os;
-}
 
 // Normal3
 template <class T>
@@ -643,6 +639,11 @@ public:
 		return i==0 ? x : (i==1 ? y : z);
 	}
 	
+	friend std::ostream& operator<<(std::ostream& os, const Normal3<T>& v){
+		os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
+		return os;
+	}
+
 	float lengthSquared() const {return x*x + y*y + z*z; }
 	float length() const {return std::sqrt(lengthSquared()); }	
 	bool hasNaN() const {return (isNaN(x) || isNaN(y) || isNaN(z)); }
@@ -679,15 +680,151 @@ public:
 	T x = 0, y = 0, z = 0;
 };
 
+class Ray{
+public:
+	Ray() : tMax(Infinity), time(0.f){}
+	Ray(const Point3f& p, const Vec3f& d, float tMax = Infinity, float time = 0.f)
+	: o(p), dir(d), tMax(tMax), time(time){}
+	Point3f operator()(float t) const{
+		return o + dir * t;
+	}
+	bool hasNaN() const{
+		return (o.hasNaN() || dir.hasNaN() || isNaN(tMax)); 
+	}
+	friend std::ostream& operator<<(std::ostream& os, const Ray& r){
+		os << "[o=" << r.o << ", dir=" << r.dir << ", tMax=" 
+		   << r.tMax << ", time=" << r.time << "]";
+		return os;
+	}
+
+	Point3f o;
+	Vec3f dir;
+	float tMax;
+	float time;
+};
+
 template <class T>
-std::ostream& operator<<(std::ostream& os, const Normal3<T>& v){
-	os << "[ " << v.x << ", " << v.y << ", " << v.z << " ]";
-	return os;
-}
+class Bounds2{
+public:
+	Bounds2(){
+		T minNum = std::numeric_limits<T>::lowest();
+		T maxNum = std::numeric_limits<T>::max();
+		pMin = Point2<T>(maxNum, maxNum);
+		pMax = Point2<T>(minNum, minNum);
+	}
+	explicit Bounds2(const Point2<T>& p) : pMin(p), pMax(p){}
+	Bounds2(const Point2<T>& p1, const Point2<T>& p2) 
+		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y)),
+		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y)){}
+	template <class U>
+	explicit operator Bounds2<U>() const{
+		return Bounds2<U>((Point2<U>)pMin, (Point2<U>)pMax);
+	}
+	Vec2<T> diagnoal() const{
+		return pMax - pMin;
+	}
+	T area() const{
+		Vec2<T> diag = diagnoal();
+		return (diag.x * diag.y);
+	}	
+	size_t maxExtent() const{
+		Vec2<T> diag = diagnoal();
+		return (diag.x > diag.y ? 0 : 1);
+	}
+	const Point2<T>& operator[](size_t i) const{
+		if(i!=0 && i!=1)
+			throw std::out_of_range("Bounds2 index out of range\n");
+		return (i==0 ? pMin : pMax);
+	}
+	Point2<T>& operator[](size_t i){
+		if(i!=0 && i!=1)
+			throw std::out_of_range("Bounds2 index out of range\n");
+		return (i==0 ? pMin : pMax);
+	}
+	bool operator==(const Bounds2<T>& b) const{
+		return (b.pMin == pMin) && (b.pMax == pMax);
+	}
+	bool operator!=(const Bounds2<T>& b) const{
+		return (b.pMin != pMin) || (b.pMax != pMax);
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, Bounds2<T> b){
+		os << "[ " << b.pMin << ", " << b.pMax << " ]";
+		return os;
+	}
+	
+	Point2<T> pMin, pMax;
+};
+
+
+template <class T>
+class Bounds3{
+public:
+	Bounds3(){
+		T minNum = std::numeric_limits<T>::lowest();
+		T maxNum = std::numeric_limits<T>::max();
+		pMin = Point3<T>(maxNum, maxNum, maxNum);
+		pMax = Point3<T>(minNum, minNum, minNum);
+	}
+	explicit Bounds3(const Point3<T>& p) : pMin(p), pMax(p){}
+	Bounds3(const Point3<T>& p1, const Point3<T>& p2) 
+		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p1.z)),
+		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p1.z)){}
+	template <class U>
+	explicit operator Bounds3<U>() const{
+		return Bounds3<U>((Point3<U>)pMin, (Point3<U>)pMax);
+	}
+	const Point3<T>& operator[](size_t i) const{
+		if(i!=0 && i!=1)
+			throw std::out_of_range("Bounds3 index out of range\n");
+		return (i==0 ? pMin : pMax);
+	}
+	Point3<T>& operator[](size_t i){
+		if(i!=0 && i!=1)
+			throw std::out_of_range("Bounds3 index out of range\n");
+		return (i==0 ? pMin : pMax);
+	}
+	bool operator==(const Bounds3<T>& b) const{
+		return (b.pMin == pMin) && (b.pMax == pMax);
+	}
+	bool operator!=(const Bounds3<T>& b) const{
+		return (b.pMin != pMin) || (b.pMax != pMax);
+	}
+	Vec3<T> diagnoal() const{
+		return pMax - pMin;
+	}
+	T surfaceArea() const{
+		Vec3<T> diag = diagnoal();
+		return 2 * (diag.x * diag.y + diag.x * diag.z + diag.y * diag.z);
+	}
+	T volume() const{
+		Vec3<T> diag = diagnoal();
+		return (diag.x * diag.y * diag.z);
+	}	
+	size_t maxExtent() const{
+		Vec3<T> diag = diagnoal();
+		return (diag.x > diag.y ? (diag.x > diag.z ? 0 : 2) : (diag.y > diag.z ? 1 : 2));
+	}
+	Point3<T> corner(size_t i) const{
+		if(i < 0 || i >= 8)
+			throw std::out_of_range("Bounds3 index in corner function is out of range!\n");
+		return Point3<T>((*this)[(i & 1)].x,
+						 (*this)[(i & 2) ? 1 : 0].y,
+						 (*this)[(i & 4) ? 1 : 0].z);
+	}
+	bool intersectP(const Ray& ray, float* hit_t0 = nullptr, float* hit_t1 = nullptr) const;
+	bool intersectP(const Ray& ray, const Vec3f& invDir, const bool isDirNeg[3]) const;
+	
+	friend std::ostream& operator<<(std::ostream& os, Bounds3<T> b){
+		os << "[ " << b.pMin << ", " << b.pMax << " ]";
+		return os;
+	}
+	
+	Point3<T> pMin, pMax;
+};
 
 
 // geometry inline function
-
 template <class T, class U>
 Vec2<T> operator*(U f, const Vec2<T>& v){
 	return v * f;
@@ -896,5 +1033,13 @@ template <class T>
 Point3<T> Ceil(const Point3<T>& p){
 	return Point3<T>(std::ceil(p.x), std::ceil(p.y), std::ceil(p.z));
 }
+
+template <class T, template <class U> class Bounds>
+Bounds<T> Union(const Bounds<T>& b1, const Bounds<T>& b2);
+
+template <class T, template <class U> class Bounds, template <class U> class Point>
+Bounds<T> Union(const Bounds<T>& b, const Point<T>& p);
+
+
 
 RIGA_NAMESPACE_END

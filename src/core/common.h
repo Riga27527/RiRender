@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cmath>
 #include <tbb/tick_count.h>
+#include <numeric>
 
 #define RIGA_NAMESPACE_BEGIN namespace riga {
 #define RIGA_NAMESPACE_END }
@@ -15,8 +16,10 @@ std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_cl
 #define TICK_TBB(x) auto bench_##x = tbb::tick_count::now();
 #define TOCK_TBB(x) std::cout << #x ": " << (tbb::tick_count::now() - bench_##x).seconds() << "s" << std::endl;
 
+#define Infinity std::numeric_limits<float>::infinity()
+// #define Epsilon  std::numeric_limits<float>::epsilon()
 
-static constexpr float PI         = 3.14159265358979323846f;
+static constexpr float PI         	= 3.14159265358979323846f;
 static constexpr float INV_PI       = 0.31830988618379067154f;
 static constexpr float INV_TWOPI    = 0.15915494309189533577f;
 static constexpr float INV_FOURPI   = 0.07957747154594766788f;

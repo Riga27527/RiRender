@@ -15,6 +15,10 @@ template <class T>
 class Point3;
 template <class T>
 class Normal3;
+template <class T>
+class Bounds2;
+template <class T>
+class Bounds3;
 
 typedef Vec2<int> Vec2i;
 typedef Vec2<float> Vec2f;
@@ -30,6 +34,11 @@ typedef Point3<float> Point3f;
 
 typedef Normal3<float> Normal3f;
 
+typedef Bounds2<int> Bounds2i;
+typedef Bounds2<float> Bounds2f;
+
+typedef Bounds3<int> Bounds3i;
+typedef Bounds3<float> Bounds3f;
 
 template <class T>
 class Vec2{
@@ -768,8 +777,8 @@ public:
 	}
 	explicit Bounds3(const Point3<T>& p) : pMin(p), pMax(p){}
 	Bounds3(const Point3<T>& p1, const Point3<T>& p2) 
-		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p1.z)),
-		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p1.z)){}
+		: pMin(std::min(p1.x, p2.x), std::min(p1.y, p2.y), std::min(p1.z, p2.z)),
+		  pMax(std::max(p1.x, p2.x), std::max(p1.y, p2.y), std::max(p1.z, p2.z)){}
 	template <class U>
 	explicit operator Bounds3<U>() const{
 		return Bounds3<U>((Point3<U>)pMin, (Point3<U>)pMax);
@@ -822,6 +831,54 @@ public:
 	
 	Point3<T> pMin, pMax;
 };
+
+template <class T>
+inline bool Bounds3<T>::intersectP(const Ray& ray, float* hit_t0, float* hit_t1) const{
+	float t0 = 0, t1 = ray.tMax;
+	for(size_t i=0; i<3; ++i){
+		if(ray.dir[i] == 0){
+			if(ray.o[i] < pMin[i] || ray.o[i] > pMax[i])
+				return false;
+		}else{
+			float invDir = 1.f / ray.dir[i];
+			float tNear = (pMin[i] - ray.o[i]) * invDir;
+			float tFar  = (pMax[i] - ray.o[i]) * invDir;
+
+			if(tNear > tFar)
+				std::swap(tNear, tFar);
+			t0 = (tNear > t0) ? tNear : t0;
+			t1 = (tFar  < t1) ? tFar  : t1;
+			if(t0 > t1) return false;
+		}
+	}
+	if(hit_t0) *hit_t0 = t0;
+	if(hit_t1) *hit_t1 = t1;
+	return true;
+}
+
+template <class T>
+bool Bounds3<T>::intersectP(const Ray& ray, const Vec3f& invDir, const bool isDirNeg[3]) const{
+	const Bounds3f& b = *this;
+
+	float tMin = (b[isDirNeg[0]].x - ray.o.x) * invDir.x;
+	float tMax = (b[1 - isDirNeg[0]].x - ray.o.x) * invDir.x;
+	float tyMin = (b[isDirNeg[1]].y - ray.o.y) * invDir.y;
+	float tyMax = (b[1 - isDirNeg[1]].y - ray.o.y) * invDir.y;
+
+	if(tMin > tyMax || tyMin > tMax)
+		return false;
+	tMin = (tMin > tyMin ? tMin : tyMin);
+	tMax = (tMax < tyMax ? tMax : tyMax);
+
+	float tzMin = (b[isDirNeg[2]].z - ray.o.z) * invDir.z;
+	float tzMax = (b[1 - isDirNeg[2]].z - ray.o.z) * invDir.z;
+
+	if(tMin > tzMax || tzMin > tMax)
+		return false;
+	tMin = (tMin > tzMin ? tMin : tzMin);
+	tMax = (tMax < tzMax ? tMax : tzMax);
+	return (tMin < ray.tMax) && (tMax > 0);
+}
 
 
 // geometry inline function
@@ -1035,11 +1092,70 @@ Point3<T> Ceil(const Point3<T>& p){
 }
 
 template <class T, template <class U> class Bounds>
-Bounds<T> Union(const Bounds<T>& b1, const Bounds<T>& b2);
+Bounds<T> Union(const Bounds<T>& b1, const Bounds<T>& b2){
+	return Bounds<T>(Min(b1.pMin, b2.pMin), Max(b1.pMax, b2.pMax));
+}
 
 template <class T, template <class U> class Bounds, template <class U> class Point>
-Bounds<T> Union(const Bounds<T>& b, const Point<T>& p);
+Bounds<T> Union(const Bounds<T>& b, const Point<T>& p){
+	return Bounds<T>(Min(b.pMin, p), Max(b.pMax, p));
+}
+
+template <class T, template <class U> class Bounds>
+Bounds<T> Intersect(const Bounds<T>& b1, const Bounds<T>& b2){
+	return Bounds<T>(Max(b1.pMin, b2.pMin), Min(b1.pMax, b2.pMax));
+}
+
+template<typename T>
+bool Overlap(const Bounds3<T>& b1, const Bounds3<T>& b2){
+	bool x = (b1.pMax.x >= b2.pMin.x) && (b2.pMax.x >= b1.pMin.x);
+	bool y = (b1.pMax.y >= b2.pMin.y) && (b2.pMax.y >= b1.pMin.y);
+	bool z = (b1.pMax.z >= b2.pMin.z) && (b2.pMax.z >= b1.pMin.z);
+	return (x && y && z);
+}
+
+template<typename T>
+bool Overlap(const Bounds2<T>& b1, const Bounds2<T>& b2){
+	bool x = (b1.pMax.x >= b2.pMin.x) && (b2.pMax.x >= b1.pMin.x);
+	bool y = (b1.pMax.y >= b2.pMin.y) && (b2.pMax.y >= b1.pMin.y);
+	return (x && y);
+}
 
 
+template<typename T>
+bool Inside(const Point3<T>& p, const Bounds3<T>& b){
+	return (p.x >= b.pMin.x && p.x <= b.pMax.x && 
+		    p.y >= b.pMin.y && p.y <= b.pMax.y &&
+		    p.z >= b.pMin.z && p.z <= b.pMax.z);
+}
+
+template<typename T>
+bool Inside(const Point2<T>& p, const Bounds2<T>& b){
+	return (p.x >= b.pMin.x && p.x <= b.pMax.x && 
+		    p.y >= b.pMin.y && p.y <= b.pMax.y);
+}
+
+template<typename T>
+bool InsideExclusive(const Point3<T>& p, const Bounds3<T>& b){
+	return (p.x >= b.pMin.x && p.x < b.pMax.x && 
+		    p.y >= b.pMin.y && p.y < b.pMax.y &&
+		    p.z >= b.pMin.z && p.z < b.pMax.z);
+}
+
+template<typename T>
+bool InsideExclusive(const Point2<T>& p, const Bounds2<T>& b){
+	return (p.x >= b.pMin.x && p.x < b.pMax.x && 
+		    p.y >= b.pMin.y && p.y < b.pMax.y);
+}
+
+template<typename T, typename U>
+Bounds3<T> Expand(const Bounds3<T>& b, U delta){
+	return Bounds3<T>(b.pMin - Vec3<T>(delta, delta, delta), b.pMax + Vec3<T>(delta, delta, delta));
+}
+
+template<typename T, typename U>
+Bounds2<T> Expand(const Bounds2<T>& b, U delta){
+	return Bounds3<T>(b.pMin - Vec2<T>(delta, delta), b.pMax + Vec2<T>(delta, delta));
+}
 
 RIGA_NAMESPACE_END

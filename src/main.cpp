@@ -6,21 +6,21 @@ using namespace riga;
 
 int main(int argc, char const *argv[])
 {
-	std::cout << "Hello Rider!" << std::endl;
-	const size_t n = 100000;
+	// std::cout << "Hello Rider!" << std::endl;
+	// const size_t n = 100000;
 	
-	TICK_TBB(for)
-	float m = 0;
-	for(size_t i=0; i < n; ++i)
-		m += i * 24 + 10;
-	TOCK_TBB(for)
-	std::cout << m << std::endl;
+	// TICK_TBB(for)
+	// float m = 0;
+	// for(size_t i=0; i < n; ++i)
+	// 	m += i * 24 + 10;
+	// TOCK_TBB(for)
+	// std::cout << m << std::endl;
 
-	Point3<float> p1{2.0f, 4.0f, 9.0f}, p2;
-	Vec3<float> v1{3.0f, 4.0f, 5.0f}, v2;
+	// Point3<float> p1{2.0f, 4.0f, 9.0f}, p2;
+	// Vec3<float> v1{3.0f, 4.0f, 5.0f}, v2;
 
-	p2 = (Point3<float>)v1;
-	v2 = (Vec3<float>)p1;
+	// p2 = (Point3<float>)v1;
+	// v2 = (Vec3<float>)p1;
 
 	// std::cout << "p2: " << p2 << std::endl;
 	// std::cout << "v2: " << v2 << std::endl;
@@ -61,7 +61,23 @@ int main(int argc, char const *argv[])
 	// trans2.m[0][2] = 3.f;
 	// std::cout << trans2.hasScale() << std::endl;
 
-	auto t = LookAt(Point3f(5.f, 0.f, 0.f), Point3f(5.f, 0.f, -10.f), Vec3f(0.f, 1.0f, 0.f));
-	std::cout << t << std::endl;
+	// auto t = LookAt(Point3f(5.f, 0.f, 0.f), Point3f(5.f, 0.f, -10.f), Vec3f(0.f, 1.0f, 0.f));
+	// std::cout << t << std::endl;
+
+	// Bounds3<float> b1(Point3f(0.f, -1.f, 0.f), Point3f(7.f, 8.f, 9.f)), b2(Point3f(-2.f, 1.f, 1.f), Point3f(10.f, 6.f, 3.f));
+	// Bounds2<float> b3(Point2f(0.f, 1.f), Point2f(7.f, 8.f)), b4(Point2f(-2.f, 1.f), Point2f(10.f, 3.f));
+	// Point3f p1(3.f, 2.f, 11.f);
+	// Point2f p2(9.f, 8.f);
+
+	// std::cout << Union(b1, b2) << std::endl;
+	// std::cout << Union(b1, p1) << std::endl;
+	// std::cout << Union(b3, b4) << std::endl;
+	// std::cout << Union(b3, p2) << std::endl;
+	// std::cout << Union(p1, p2) << std::endl;
+
+	Bounds3<float> b(Point3f(1.f, 1.f, 1.f), Point3f(5.f, 5.f, 5.f));
+	Ray r(Point3f(0.f, 0.f, 0.f), Vec3f(0.2f, 0.2f, 0.2f), 1);
+	bool neg[3] = {0, 0, 0};
+	std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
 	return 0;
 }

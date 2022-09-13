@@ -19,6 +19,8 @@ std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_cl
 #define Infinity std::numeric_limits<float>::infinity()
 // #define Epsilon  std::numeric_limits<float>::epsilon()
 
+RIGA_NAMESPACE_BEGIN
+
 static constexpr float PI         	= 3.14159265358979323846f;
 static constexpr float INV_PI       = 0.31830988618379067154f;
 static constexpr float INV_TWOPI    = 0.15915494309189533577f;
@@ -26,7 +28,29 @@ static constexpr float INV_FOURPI   = 0.07957747154594766788f;
 static constexpr float SQRT_TWO     = 1.41421356237309504880f;
 static constexpr float INV_SQRT_TWO = 0.70710678118654752440f;
 
-RIGA_NAMESPACE_BEGIN
+template <class T>
+class Vec2;
+template <class T>
+class Vec3;
+template <class T>
+class Point2;
+template <class T>
+class Point3;
+template <class T>
+class Normal3;
+template <class T>
+class Bounds2;
+template <class T>
+class Bounds3;
+
+class Transform;
+class Shape;
+class Primitive;
+class GeometricPrimitive;
+struct Interaction;
+class SurfaceInteraction;
+
+
 template <class T>
 bool isNaN(const T x){
 	return std::isnan(x);

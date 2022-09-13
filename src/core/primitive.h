@@ -3,6 +3,7 @@
 #include "common.h"
 #include "geometry.h"
 #include "shape.h"
+#include <vector>
 
 RIGA_NAMESPACE_BEGIN
 
@@ -27,6 +28,16 @@ public:
 
 private:
 	std::shared_ptr<Shape> shape;
+};
+
+class Aggregate{
+	virtual ~Aggregate(){}
+	virtual Bounds3f worldBound() const = 0;
+	virtual bool intersect(const Ray& ray, SurfaceInteraction *) const = 0;
+	virtual bool intersectP(const Ray& ray) const = 0;
+
+protected:
+	std::vector<std::shared_ptr<Primitive>> primitives;
 };
 
 RIGA_NAMESPACE_END

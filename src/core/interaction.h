@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "shape.h"
 #include "primitive.h"
 

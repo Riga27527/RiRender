@@ -5,21 +5,6 @@
 
 RIGA_NAMESPACE_BEGIN
 
-template <class T>
-class Vec2;
-template <class T>
-class Vec3;
-template <class T>
-class Point2;
-template <class T>
-class Point3;
-template <class T>
-class Normal3;
-template <class T>
-class Bounds2;
-template <class T>
-class Bounds3;
-
 typedef Vec2<int> Vec2i;
 typedef Vec2<float> Vec2f;
 

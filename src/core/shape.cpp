@@ -1,0 +1,6 @@
+#include "shape.h"
+
+RIGA_NAMESPACE_BEGIN
+
+
+RIGA_NAMESPACE_END

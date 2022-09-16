@@ -29,6 +29,7 @@ template <class T>
 class Vec2{
 public:
 	Vec2(){}
+	Vec2(T t) : x(t), y(t){}
 	Vec2(T xx, T yy) : x(xx), y(yy){}
 	Vec2(const Vec2<T>& vec) : x(vec.x), y(vec.y){}
 	Vec2<T>& operator=(const Vec2<T> &vec){
@@ -137,6 +138,7 @@ template <class T>
 class Vec3{
 public:
 	Vec3(){}
+	Vec3(T t) : x(t), y(t), z(t){}
 	Vec3(T xx, T yy, T zz) : x(xx), y(yy), z(zz){}
 	Vec3(const Vec3<T>& vec) : x(vec.x), y(vec.y), z(vec.z){}
 	Vec3<T>& operator=(const Vec3<T> &vec){
@@ -272,6 +274,7 @@ template <class T>
 class Point2{
 public:
 	Point2(){}
+	Point2(T t) : x(t), y(t){}
 	Point2(T xx, T yy) : x(xx), y(yy){}
 	Point2(const Point2<T>& p) : x(p.x), y(p.y){}
 	Point2<T>& operator=(const Point2<T> &p){
@@ -405,6 +408,7 @@ template <class T>
 class Point3{
 public:
 	Point3(){}
+	Point3(T t) : x(t), y(t), z(t){}
 	Point3(T xx, T yy, T zz) : x(xx), y(yy), z(zz){}
 	Point3(const Point3<T>& p) : x(p.x), y(p.y), z(p.z){}
 	Point3<T>& operator=(const Point3<T> &p){
@@ -679,7 +683,7 @@ public:
 	Ray() : tMax(Infinity), time(0.f){}
 	Ray(const Point3f& p, const Vec3f& d, float tMax = Infinity, float time = 0.f)
 	: o(p), dir(d), tMax(tMax), time(time){}
-	Point3f operator()(float t) const{
+	Point3f at(float t) const{
 		return o + dir * t;
 	}
 	bool hasNaN() const{

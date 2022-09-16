@@ -70,7 +70,7 @@ Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2);
 
 class Transform{
 public:
-	Transform(){}
+	Transform() : m(Mat4x4f::identity()), mInv(Mat4x4f::identity()){}
 	Transform(const Mat4x4f& mat) : m(mat), mInv(Inverse(mat)){}
 	Transform(float mat[4][4]) : m(Mat4x4f(mat)), mInv(Inverse(m)){}
 	Transform(const Mat4x4f& mat, const Mat4x4f& matInv) : m(mat), mInv(matInv){}
@@ -126,6 +126,19 @@ public:
 			m[1][0] * n[0] + m[1][1] * n[1] + m[1][2] * n[2],
 			m[2][0] * n[0] + m[2][1] * n[1] + m[2][2] * n[2]
 			);		
+	}
+	template<class T>
+	Bounds3<T> operator()(const Bounds3<T>& b) const{
+	   	const Transform &M = *this;
+	    Bounds3f ret(M(Point3f(b.pMin.x, b.pMin.y, b.pMin.z)));
+	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMin.y, b.pMin.z)));
+	    ret = Union(ret, M(Point3f(b.pMin.x, b.pMax.y, b.pMin.z)));
+	    ret = Union(ret, M(Point3f(b.pMin.x, b.pMin.y, b.pMax.z)));
+	    ret = Union(ret, M(Point3f(b.pMin.x, b.pMax.y, b.pMax.z)));
+	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMax.y, b.pMin.z)));
+	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMin.y, b.pMax.z)));
+	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMax.y, b.pMax.z)));
+	    return ret;
 	}
 	friend std::ostream& operator<<(std::ostream& os, const Transform& t);
 private:

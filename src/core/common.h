@@ -5,6 +5,7 @@
 #include <cmath>
 #include <tbb/tick_count.h>
 #include <numeric>
+// #include "shape.h"
 
 #define RIGA_NAMESPACE_BEGIN namespace riga {
 #define RIGA_NAMESPACE_END }
@@ -49,7 +50,7 @@ class Primitive;
 class GeometricPrimitive;
 struct Interaction;
 class SurfaceInteraction;
-
+class Sphere;
 
 template <class T>
 bool isNaN(const T x){
@@ -67,5 +68,9 @@ inline float Radians(float deg){
 
 inline float Degrees(float rad){
 	return (180.f / PI) * rad;
+}
+
+inline float Clamp(float x, float small, float large){
+	return std::min(std::max(x, small), large);
 }
 RIGA_NAMESPACE_END

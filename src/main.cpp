@@ -1,8 +1,48 @@
 #include <iostream>
+#include <vector>
+#include <memory>
+#include <fstream>
 #include "core/geometry.h"
 #include "core/transform.h"
+#include "shapes/sphere.h"
 
 using namespace riga;
+
+void render_ppm(int width, int height){
+	const Transform sphereT_obj2wor, sphereT_wor2obj;
+	std::shared_ptr<Shape> sphere = std::make_shared<Sphere>(&sphereT_obj2wor, &sphereT_wor2obj, false, 1.f);
+
+	std::vector<Vec3f> framebuffer(width * height);
+	Point3f lower_let_corner(-2.0f, -2.0f, -1.0f);
+	Point3f ray_o(0.f, 0.f, -3.f);
+	Vec3f horizontal(4.f, 0.f, 0.f);
+	Vec3f vertical(0.f, 4.f, 0.f);
+	int m = 0;
+	for(size_t i=height - 1; i>=0; ++i){
+		for(size_t j=0; j<width; ++j){
+			float u = (i + 0.5) / (width - 1);
+			float v = (j + 0.5) / (height - 1);
+			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
+			Ray r(ray_o, Normalize(pos - ray_o));
+			if(sphere->intersectP(r))
+				framebuffer[m++] = Vec3f(1.f, 0.f, 0.f);
+			else
+				framebuffer[m++] = Vec3f(0.f, 0.f, 0.f);
+		}
+	}
+
+
+    FILE* fp = fopen("binary.ppm", "wb");
+    (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
+    for (auto i = 0; i < height * width; ++i) {
+        static unsigned char color[3];
+        color[0] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].x));
+        color[1] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].y));
+        color[2] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].z));
+        fwrite(color, 1, 3, fp);
+    }
+    fclose(fp); 
+}
 
 int main(int argc, char const *argv[])
 {
@@ -75,9 +115,11 @@ int main(int argc, char const *argv[])
 	// std::cout << Union(b3, p2) << std::endl;
 	// std::cout << Union(p1, p2) << std::endl;
 
-	Bounds3<float> b(Point3f(1.f, 1.f, 1.f), Point3f(5.f, 5.f, 5.f));
-	Ray r(Point3f(0.f, 0.f, 0.f), Vec3f(0.2f, 0.2f, 0.2f), 1);
-	bool neg[3] = {0, 0, 0};
-	std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
+	// Bounds3<float> b(Point3f(1.f, 1.f, 1.f), Point3f(5.f, 5.f, 5.f));
+	// Ray r(Point3f(0.f, 0.f, 0.f), Vec3f(0.2f, 0.2f, 0.2f), 1);
+	// bool neg[3] = {0, 0, 0};
+	// std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
+
+	render_ppm(10, 10);
 	return 0;
 }

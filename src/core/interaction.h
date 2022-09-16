@@ -24,6 +24,8 @@ struct Interaction{
 class SurfaceInteraction : public Interaction{
 public:
 	SurfaceInteraction(){}
+	SurfaceInteraction(const Point3f& p, const Vec3f& wo, float t, const Shape* sh)
+		: Interaction(p, wo, t), shape(sh){}
 	void computeScatteringFunctions();
 
 	const Shape* shape = nullptr;

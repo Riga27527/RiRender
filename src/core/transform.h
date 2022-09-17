@@ -59,14 +59,14 @@ struct Mat4x4f{
         mat.m[3][0] = mat.m[3][1] = mat.m[3][2] = 0.f;
         return mat;
 	}
+	friend Mat4x4f Transpose(const Mat4x4f& mat);
+	friend Mat4x4f Inverse(const Mat4x4f& m);
+	friend Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2);
 	friend std::ostream& operator<<(std::ostream& os, const Mat4x4f& mat);
 
 	float m[4][4] = {0};
 };
 
-Mat4x4f Transpose(const Mat4x4f& mat);
-Mat4x4f Inverse(const Mat4x4f& m);
-Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2);
 
 class Transform{
 public:
@@ -139,6 +139,15 @@ public:
 	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMin.y, b.pMax.z)));
 	    ret = Union(ret, M(Point3f(b.pMax.x, b.pMax.y, b.pMax.z)));
 	    return ret;
+	}
+	Ray operator()(const Ray& r) const{
+		return Ray((*this)(r.o), (*this)(r.dir), r.tMax, r.time);
+	}
+	friend Transform Inverse(const Transform& t){
+		return Transform(t.mInv, t.m);
+	}
+	friend Transform Transpose(const Transform& t){
+		return Transform(Transpose(t.m), Transpose(t.mInv));
 	}
 	friend std::ostream& operator<<(std::ostream& os, const Transform& t);
 private:

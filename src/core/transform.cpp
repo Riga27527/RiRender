@@ -5,9 +5,9 @@ RIGA_NAMESPACE_BEGIN
 
 Mat4x4f Mul(const Mat4x4f& m1, const Mat4x4f& m2){
 	Mat4x4f r;
-	for(size_t i=0; i<4; ++i)
-		for(size_t j=0; j<4; ++j)
-			for(size_t k=0; j<4; ++k)
+	for(int i=0; i<4; ++i)
+		for(int j=0; j<4; ++j)
+			for(int k=0; k<4; ++k)
 				r.m[i][j] += m1.m[i][k] * m2.m[k][j];
 	return r;
 }

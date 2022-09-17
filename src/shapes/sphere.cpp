@@ -8,9 +8,10 @@ Bounds3f Sphere::objectBound() const{
 
 bool Sphere::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) const{
 	// simply from rto
-	Vec3f oc = ray.o - Point3f(0.f);
-	float a = ray.dir.lengthSquared();
-	float half_b = Dot(oc, ray.dir);
+	Ray r = (*world2Object)(ray);
+	Vec3f oc = r.o - Point3f(0.f);
+	float a = r.dir.lengthSquared();
+	float half_b = Dot(oc, r.dir);
 	float c = oc.lengthSquared() - radius * radius;
 	float discriminant = half_b * half_b - a * c;
 	if(discriminant < 0)
@@ -19,21 +20,22 @@ bool Sphere::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) c
 	// find the smallest positive root
 	float dis_sqrt = std::sqrt(discriminant);
 	float root = (-half_b - dis_sqrt) / a;
-	if(root < 0.f || root > ray.tMax){
+	if(root < 0.f || root > r.tMax){
 		root = (-half_b + dis_sqrt) / a;
-		if(root < 0.f || root > ray.tMax)
+		if(root < 0.f || root > r.tMax)
 			return false;
 	}
-	Point3f pHit = ray.at(root);
+	Point3f pHit = r.at(root);
 	*tHit = root;
-	// *isect = (*object2World)(SurfaceInteraction(pHit, -ray.dir, ray.time, this));
+	// *isect = (*object2World)(SurfaceInteraction(pHit, -r.dir, r.time, this));
 	return true;
 }
 
 bool Sphere::intersectP(const Ray& ray) const{
-	Vec3f oc = ray.o - Point3f(0.f);
-	float a = ray.dir.lengthSquared();
-	float half_b = Dot(oc, ray.dir);
+	Ray r = (*world2Object)(ray);
+	Vec3f oc = r.o - Point3f(0.f);
+	float a = r.dir.lengthSquared();
+	float half_b = Dot(oc, r.dir);
 	float c = oc.lengthSquared() - radius * radius;
 	float discriminant = half_b * half_b - a * c;
 	if(discriminant < 0)
@@ -42,9 +44,9 @@ bool Sphere::intersectP(const Ray& ray) const{
 	// find the smallest positive root
 	float dis_sqrt = std::sqrt(discriminant);
 	float root = (-half_b - dis_sqrt) / a;
-	if(root < 0.f || root > ray.tMax){
+	if(root < 0.f || root > r.tMax){
 		root = (-half_b + dis_sqrt) / a;
-		if(root < 0.f || root > ray.tMax)
+		if(root < 0.f || root > r.tMax)
 			return false;
 	}
 	return true;	

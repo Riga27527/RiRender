@@ -9,25 +9,27 @@
 using namespace riga;
 
 void render_ppm(int width, int height){
-	const Transform sphereT_obj2wor, sphereT_wor2obj;
+	Transform sphereT_obj2wor, sphereT_wor2obj;
+	sphereT_obj2wor = sphereT_obj2wor * Translate(Vec3f(1.0f, 0.f, 0.f));
+	sphereT_wor2obj = Inverse(sphereT_obj2wor);
 	std::shared_ptr<Shape> sphere = std::make_shared<Sphere>(&sphereT_obj2wor, &sphereT_wor2obj, false, 1.f);
 
 	std::vector<Vec3f> framebuffer(width * height);
-	Point3f lower_let_corner(-2.0f, -2.0f, -1.0f);
-	Point3f ray_o(0.f, 0.f, -3.f);
+	Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
+	Point3f ray_o(0.f, 0.f, 4.f);
 	Vec3f horizontal(4.f, 0.f, 0.f);
 	Vec3f vertical(0.f, 4.f, 0.f);
 	int m = 0;
-	for(size_t i=height - 1; i>=0; ++i){
-		for(size_t j=0; j<width; ++j){
-			float u = (i + 0.5) / (width - 1);
-			float v = (j + 0.5) / (height - 1);
+	for(int i=height-1; i>=0; --i){
+		for(int j=0; j<width; ++j){	
+			float u = (j + 0.5) / (width - 1);
+			float v = (i + 0.5) / (height - 1);
 			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
 			Ray r(ray_o, Normalize(pos - ray_o));
 			if(sphere->intersectP(r))
 				framebuffer[m++] = Vec3f(1.f, 0.f, 0.f);
 			else
-				framebuffer[m++] = Vec3f(0.f, 0.f, 0.f);
+				framebuffer[m++] = Vec3f(1.f, 1.f, 1.f);
 		}
 	}
 
@@ -120,6 +122,6 @@ int main(int argc, char const *argv[])
 	// bool neg[3] = {0, 0, 0};
 	// std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
 
-	render_ppm(10, 10);
+	render_ppm(200, 200);
 	return 0;
 }

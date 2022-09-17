@@ -36,3 +36,5 @@
 *.exr
 *.obj
 *build*
+*.tags
+*.tags_sorted_by_file

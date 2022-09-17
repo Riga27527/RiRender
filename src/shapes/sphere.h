@@ -6,7 +6,6 @@ RIGA_NAMESPACE_BEGIN
 
 class Sphere : public Shape{
 public:
-	Sphere() : Shape(){}
 	Sphere(const Transform* obj2wor, const Transform* wor2obj, bool reverseOrient,
 			float r) : Shape(obj2wor, wor2obj, reverseOrient), radius(r){}
 	Bounds3f objectBound() const;

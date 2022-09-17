@@ -5,14 +5,28 @@
 #include "core/geometry.h"
 #include "core/transform.h"
 #include "shapes/sphere.h"
+#include "shapes/triangle.h"
 
 using namespace riga;
 
 void render_ppm(int width, int height){
-	Transform sphereT_obj2wor, sphereT_wor2obj;
-	sphereT_obj2wor = sphereT_obj2wor * Translate(Vec3f(1.0f, 0.f, 0.f));
-	sphereT_wor2obj = Inverse(sphereT_obj2wor);
-	std::shared_ptr<Shape> sphere = std::make_shared<Sphere>(&sphereT_obj2wor, &sphereT_wor2obj, false, 1.f);
+	// Transform sphereT_obj2wor, sphereT_wor2obj;
+	// sphereT_obj2wor = sphereT_obj2wor * Translate(Vec3f(1.0f, 1.f, 0.f));
+	// sphereT_wor2obj = Inverse(sphereT_obj2wor);
+	// std::shared_ptr<Shape> sphere = std::make_shared<Sphere>(&sphereT_obj2wor, &sphereT_wor2obj, false, 1.f);
+
+	Transform Tri_obj2wor, Tri_wor2obj;
+	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(1.0f, 1.f, 0.f));
+	int tri_num = 2, point_num = 6;
+	const Point3f mesh_p[] = {
+		Point3f(-1.f, 1.f, 0.f), Point3f(0.f, 1.f, 0.f), Point3f(1.f, 1.f, 0.f),
+		Point3f(-1.f, -1.f, 0.f), Point3f(0.f, -1.f, 0.f), Point3f(1.f, -1.f, 0.f)
+	};
+	const int mesh_vInds[] = {0, 3, 1, 2, 4, 5};
+
+	std::vector<std::shared_ptr<Shape>> tri_mesh = CreateTriangleMesh(
+	&Tri_obj2wor, &Tri_wor2obj, false, tri_num, point_num, mesh_vInds, mesh_p, 
+	nullptr, nullptr, nullptr, nullptr);
 
 	std::vector<Vec3f> framebuffer(width * height);
 	Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
@@ -20,16 +34,26 @@ void render_ppm(int width, int height){
 	Vec3f horizontal(4.f, 0.f, 0.f);
 	Vec3f vertical(0.f, 4.f, 0.f);
 	int m = 0;
+	// std::cout << tri_mesh.size() << std::endl;
 	for(int i=height-1; i>=0; --i){
 		for(int j=0; j<width; ++j){	
 			float u = (j + 0.5) / (width - 1);
 			float v = (i + 0.5) / (height - 1);
 			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
 			Ray r(ray_o, Normalize(pos - ray_o));
-			if(sphere->intersectP(r))
-				framebuffer[m++] = Vec3f(1.f, 0.f, 0.f);
-			else
-				framebuffer[m++] = Vec3f(1.f, 1.f, 1.f);
+
+			framebuffer[m] = Vec3f(1.f, 1.f, 1.f);
+			for(size_t k=0; k<tri_mesh.size(); ++k){
+				if(tri_mesh[k]->intersectP(r)){
+					framebuffer[m] = Vec3f(1.f, 0.f, 0.f);
+					break;
+				}
+			}
+			++m;	
+			// if(sphere->intersectP(r))
+			// 	framebuffer[m++] = Vec3f(1.f, 0.f, 0.f);
+			// else
+			// 	framebuffer[m++] = Vec3f(1.f, 1.f, 1.f);
 		}
 	}
 

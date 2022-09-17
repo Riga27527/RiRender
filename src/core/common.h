@@ -51,6 +51,8 @@ class GeometricPrimitive;
 struct Interaction;
 class SurfaceInteraction;
 class Sphere;
+struct TriangleMesh;
+class Triangle;
 
 template <class T>
 bool isNaN(const T x){

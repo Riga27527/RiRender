@@ -8,6 +8,7 @@ Bounds3f Sphere::objectBound() const{
 
 bool Sphere::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) const{
 	// simply from rto
+	// Intersect in Object space
 	Ray r = (*world2Object)(ray);
 	Vec3f oc = r.o - Point3f(0.f);
 	float a = r.dir.lengthSquared();
@@ -32,6 +33,8 @@ bool Sphere::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) c
 }
 
 bool Sphere::intersectP(const Ray& ray) const{
+	
+	// Intersect in Object space
 	Ray r = (*world2Object)(ray);
 	Vec3f oc = r.o - Point3f(0.f);
 	float a = r.dir.lengthSquared();

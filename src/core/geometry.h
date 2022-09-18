@@ -449,7 +449,7 @@ public:
 	}
 
 	Point3<T> operator+(const Point3<T> &p) const{
-		return Point2<T>(x+p.x, y+p.y, z+p.z);
+		return Point3<T>(x+p.x, y+p.y, z+p.z);
 	}
 
 	// point + vec = point
@@ -729,6 +729,12 @@ public:
 		Vec2<T> diag = diagnoal();
 		return (diag.x > diag.y ? 0 : 1);
 	}
+	Vec2<T> offset(const Point2f& p) const{
+		Vec2<T> v = p - pMin;
+		v.x /= (pMax.x - pMin.x);
+		v.y /= (pMax.y - pMin.y);
+		return v;
+	}
 	const Point2<T>& operator[](size_t i) const{
 		if(i!=0 && i!=1)
 			throw std::out_of_range("Bounds2 index out of range\n");
@@ -803,6 +809,13 @@ public:
 		Vec3<T> diag = diagnoal();
 		return (diag.x > diag.y ? (diag.x > diag.z ? 0 : 2) : (diag.y > diag.z ? 1 : 2));
 	}
+	Vec3<T> offset(const Point3f& p) const{
+		Vec3<T> v = p - pMin;
+		v.x /= (pMax.x - pMin.x);
+		v.y /= (pMax.y - pMin.y);
+		v.z /= (pMax.z - pMin.z);
+		return v;
+	}
 	Point3<T> corner(size_t i) const{
 		if(i < 0 || i >= 8)
 			throw std::out_of_range("Bounds3 index in corner function is out of range!\n");
@@ -810,9 +823,12 @@ public:
 						 (*this)[(i & 2) ? 1 : 0].y,
 						 (*this)[(i & 4) ? 1 : 0].z);
 	}
+	bool isValid(){
+		return (pMin.x < pMax.x && pMin.y < pMax.y && pMin.z < pMax.z);
+	}
 	bool intersectP(const Ray& ray, float* hit_t0 = nullptr, float* hit_t1 = nullptr) const;
 	bool intersectP(const Ray& ray, const Vec3f& invDir, const bool isDirNeg[3]) const;
-	
+
 	friend std::ostream& operator<<(std::ostream& os, Bounds3<T> b){
 		os << "[ " << b.pMin << ", " << b.pMax << " ]";
 		return os;
@@ -883,6 +899,16 @@ Vec3<T> operator*(U f, const Vec3<T>& v){
 
 template <class T, class U>
 Normal3<T> operator*(U f, const Normal3<T>& v){
+	return v * f;
+}
+
+template <class T, class U>
+Point2<T> operator*(U f, const Point2<T>& v){
+	return v * f;
+}
+
+template <class T, class U>
+Point3<T> operator*(U f, const Point3<T>& v){
 	return v * f;
 }
 

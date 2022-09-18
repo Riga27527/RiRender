@@ -31,6 +31,8 @@ private:
 };
 
 class Aggregate{
+public:
+	Aggregate(std::vector<std::shared_ptr<Primitive>> p) : primitives(std::move(p)){}
 	virtual ~Aggregate(){}
 	virtual Bounds3f worldBound() const = 0;
 	virtual bool intersect(const Ray& ray, SurfaceInteraction *) const = 0;

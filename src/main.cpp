@@ -6,6 +6,7 @@
 #include "core/transform.h"
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
+#include "accelerators/bvh.h"
 
 using namespace riga;
 
@@ -68,6 +69,65 @@ void render_ppm(int width, int height){
         fwrite(color, 1, 3, fp);
     }
     fclose(fp); 
+}
+
+
+void OBJ_loader_BVH_test(){
+	Transform Tri_obj2wor, Tri_wor2obj;
+	// Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(1.0f, 1.f, 0.f));
+	// int tri_num = 2, point_num = 6;
+	// const Point3f mesh_p[] = {
+	// 	Point3f(-1.f, 1.f, 0.f), Point3f(0.f, 1.f, 0.f), Point3f(1.f, 1.f, 0.f),
+	// 	Point3f(-1.f, -1.f, 0.f), Point3f(0.f, -1.f, 0.f), Point3f(1.f, -1.f, 0.f)
+	// };
+	// const int mesh_vInds[] = {0, 3, 1, 2, 4, 5};
+
+	std::string obj_path("/home/cs18/Rider/scenes/obj/bunny.obj"); 
+	std::vector<std::shared_ptr<Shape>> tri_mesh =
+		CreateOBJMesh(&Tri_obj2wor, &Tri_wor2obj, false, obj_path);
+
+	std::vector<std::shared_ptr<Primitive>> prims;
+	for(size_t i=0; i<tri_mesh.size(); ++i)
+		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]));
+	std::shared_ptr<Aggregate> agg = std::make_shared<BVH>(prims);
+
+	// std::vector<Vec3f> framebuffer(width * height);
+	// Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
+	// Point3f ray_o(0.f, 0.f, 4.f);
+	// Vec3f horizontal(4.f, 0.f, 0.f);
+	// Vec3f vertical(0.f, 4.f, 0.f);
+	// int m = 0;
+	// // std::cout << tri_mesh.size() << std::endl;
+	// for(int i=height-1; i>=0; --i){
+	// 	for(int j=0; j<width; ++j){	
+	// 		float u = (j + 0.5) / (width - 1);
+	// 		float v = (i + 0.5) / (height - 1);
+	// 		Point3f pos = lower_let_corner + u * horizontal + v * vertical;
+	// 		Ray r(ray_o, Normalize(pos - ray_o));
+
+	// 		framebuffer[m] = Vec3f(1.f, 1.f, 1.f);
+	// 		for(size_t k=0; k<tri_mesh.size(); ++k){
+	// 			if(tri_mesh[k]->intersectP(r)){
+	// 				framebuffer[m] = Vec3f(1.f, 0.f, 0.f);
+	// 				break;
+	// 			}
+	// 		}
+	// 		++m;
+	// 	}
+	// }
+
+ //    FILE* fp = fopen("binary.ppm", "wb");
+ //    (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
+ //    for (auto i = 0; i < height * width; ++i) {
+ //        static unsigned char color[3];
+ //        color[0] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].x));
+ //        color[1] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].y));
+ //        color[2] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].z));
+ //        fwrite(color, 1, 3, fp);
+ //    }
+ //    fclose(fp); 
+
+
 }
 
 int main(int argc, char const *argv[])
@@ -146,6 +206,8 @@ int main(int argc, char const *argv[])
 	// bool neg[3] = {0, 0, 0};
 	// std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
 
-	render_ppm(200, 200);
+	// render_ppm(200, 200);
+
+	OBJ_loader_BVH_test();
 	return 0;
 }

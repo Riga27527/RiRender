@@ -20,11 +20,12 @@ public:
 
 class GeometricPrimitive : public Primitive{
 public:
-	GeometricPrimitive(const std::shared_ptr<Shape>& shape);
-	virtual Bounds3f worldBound() const;
-	virtual bool intersect(const Ray& ray, SurfaceInteraction *) const;
-	virtual bool intersectP(const Ray& ray) const;
-	virtual void computeScatteringFunctions() const;
+	GeometricPrimitive(const std::shared_ptr<Shape>& shape) 
+		: shape(shape){};
+	Bounds3f worldBound() const;
+	bool intersect(const Ray& ray, SurfaceInteraction* isect) const;
+	bool intersectP(const Ray& ray) const;
+	void computeScatteringFunctions() const;
 
 private:
 	std::shared_ptr<Shape> shape;

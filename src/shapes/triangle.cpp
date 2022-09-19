@@ -1,4 +1,6 @@
 #include "triangle.h"
+#include <fstream>
+#include <sstream>
 
 RIGA_NAMESPACE_BEGIN
 
@@ -35,6 +37,97 @@ TriangleMesh::TriangleMesh(
 	if(fIndices)
 		faceIndices = std::vector<int>(fIndices, fIndices + nTris);
 
+}
+
+WavefrontOBJ::WavefrontOBJ(const Transform& Obj2Wor, const std::string& filePath){
+		std::ifstream is(filePath);
+        if (is.fail())
+            throw("Unable to open OBJ file !");
+
+        std::cout << "Loading \"" << filePath << "\" .. ";
+        std::cout.flush();
+        TICK(OBJ_LOAD)
+
+        std::vector<Point3f>   positions;
+        std::vector<Point2f>   texcoords;
+        std::vector<Normal3f>  normals;
+        std::vector<int>       indices;
+        std::vector<OBJVertex> vertices;
+        std::vector<int>	   f_indices;
+        VertexMap vertexMap;
+
+        std::string line_str;
+        while (std::getline(is, line_str)) {
+            std::istringstream line(line_str);
+            std::string prefix;
+            line >> prefix;
+
+            if (prefix == "v") {
+                Point3f p;
+                line >> p.x >> p.y >> p.z;
+                positions.push_back(Obj2Wor(p));
+            } else if (prefix == "vt") {
+                Point2f tc;
+                line >> tc.x >> tc.y;
+                texcoords.push_back(tc);
+            } else if (prefix == "vn") {
+                Normal3f n;
+                line >> n.x >> n.y >> n.z;
+                normals.push_back(Obj2Wor(n.normalized()));
+            } else if (prefix == "f") {
+                std::string v1, v2, v3, v4;
+                line >> v1 >> v2 >> v3 >> v4;
+                OBJVertex verts[6];
+                int nVertices = 3;
+
+                verts[0] = OBJVertex(v1);
+                verts[1] = OBJVertex(v2);
+                verts[2] = OBJVertex(v3);
+
+                if (!v4.empty()) {
+                    /* This is a quad, split into two triangles */
+                    verts[3] = OBJVertex(v4);
+                    verts[4] = verts[0];
+                    verts[5] = verts[2];
+                    nVertices = 6;
+                }
+                /* Convert to an indexed vertex list */
+                for (int i=0; i<nVertices; ++i) {
+                    const OBJVertex &v = verts[i];
+                    VertexMap::const_iterator it = vertexMap.find(v);
+                    if (it == vertexMap.end()) {
+                        vertexMap[v] = (uint32_t) vertices.size();
+                        indices.push_back((uint32_t) vertices.size());
+                        vertices.push_back(v);
+                    } else {
+                        indices.push_back(it->second);
+                    }
+                }
+            }
+        }
+
+        nTriangles = indices.size() / 3;
+        nVertices = vertices.size();
+       	vertexIndices = indices;
+
+        p.reset(new Point3f[nVertices]);
+        for (uint32_t i=0; i<nVertices; ++i)
+            p[i] = positions.at(vertices[i].p-1);
+
+        if (!normals.empty()) {
+        	n.reset(new Normal3f[nVertices]);
+            for (uint32_t i=0; i<nVertices; ++i)
+                n[i] = normals.at(vertices[i].n-1);
+        }
+
+        if (!texcoords.empty()) {
+        	uv.reset(new Point2f[nVertices]);
+            for (uint32_t i=0; i<nVertices; ++i)
+                uv[i] = texcoords.at(vertices[i].uv-1);
+        }
+
+        std::cout << "done. (V=" << nVertices << ", F=" << nTriangles << std::endl;	
+        TOCK(OBJ_LOAD)
 }
 
 Bounds3f Triangle::worldBound() const{
@@ -142,5 +235,18 @@ std::vector<std::shared_ptr<Shape>> CreateTriangleMesh(
 		triangles.push_back(std::make_shared<Triangle>(obj2wor, wor2obj, reverseOrient, mesh, i));
 	return triangles;
 }
+
+std::vector<std::shared_ptr<Shape>> CreateOBJMesh(
+	const Transform* obj2wor, const Transform* wor2obj, bool reverseOrient, std::string filePath){
+
+	std::shared_ptr<TriangleMesh> mesh = std::make_shared<WavefrontOBJ>(*obj2wor, filePath);
+
+	std::vector<std::shared_ptr<Shape>> triangles;
+	triangles.reserve(mesh->nTriangles);
+	for(size_t i=0; i<mesh->nTriangles; ++i)
+		triangles.push_back(std::make_shared<Triangle>(obj2wor, wor2obj, reverseOrient, mesh, i));
+	return triangles;
+}
+
 
 RIGA_NAMESPACE_END

@@ -697,7 +697,7 @@ public:
 
 	Point3f o;
 	Vec3f dir;
-	float tMax;
+	mutable float tMax;
 	float time;
 };
 

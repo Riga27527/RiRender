@@ -5,6 +5,7 @@
 #include <cmath>
 #include <tbb/tick_count.h>
 #include <numeric>
+#include <vector>
 // #include "shape.h"
 
 #define RIGA_NAMESPACE_BEGIN namespace riga {
@@ -75,4 +76,10 @@ inline float Degrees(float rad){
 inline float Clamp(float x, float small, float large){
 	return std::min(std::max(x, small), large);
 }
+
+std::vector<std::string> tokenize(const std::string &string, const std::string &delim, bool includeEmpty);
+
+// Convert a string into an unsigned integer value
+unsigned int toUInt(const std::string &str);
+
 RIGA_NAMESPACE_END

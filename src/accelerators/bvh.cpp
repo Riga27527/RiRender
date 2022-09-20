@@ -22,7 +22,8 @@ BVH::BVH(std::vector<std::shared_ptr<Primitive>> prims,
 	BVHNode* node = recursiveBuild(primInfo, &total_nodes, 0, primitives.size(), orderedPrims);
 	primitives.swap(orderedPrims);
 	// construct a empty object to clear primInfo capacity
-	std::vector<BVHPrimInfo>().swap(primInfo);
+	// std::vector<BVHPrimInfo>().swap(primInfo);
+	primInfo.resize(0);
 
 	root = new LinearBVHNode[total_nodes];
 	int offset = 0;
@@ -37,10 +38,11 @@ BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_node
 	(*total_nodes)++;
 
 	Bounds3f bounds;
-	for(size_t i=0; i<primInfo.size(); ++i)
+	for(size_t i=start; i<end; ++i)
 		bounds = Union(bounds, primInfo[i].bounds);
 	int nPrims = end - start;
-	
+	// std::cout << *(total_nodes) << std::endl;
+
 	// 
 	if(nPrims == 1){
 		int firstPrimIndex = orderedPrims.size();
@@ -48,7 +50,7 @@ BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_node
 			size_t index = primInfo[i].primIndex;
 			orderedPrims.push_back(primitives[index]);
 		}
-		node->initLeaf(start, 1, bounds);
+		node->initLeaf(firstPrimIndex, nPrims, bounds);
 		return node;
 	}else{
 		Bounds3f centroidBounds;
@@ -63,7 +65,7 @@ BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_node
 				size_t index = primInfo[i].primIndex;
 				orderedPrims.push_back(primitives[index]);
 			}
-			node->initLeaf(start, nPrims, bounds);	
+			node->initLeaf(firstPrimIndex, nPrims, bounds);	
 			return node;		
 		}else{
 			int mid = (start + end) / 2;
@@ -121,7 +123,7 @@ BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_node
 									[=](const BVHPrimInfo& info){
 										int bucket_index = static_cast<int>(nBuckets * 
 											centroidBounds.offset(info.centroid)[splitDim]);
-										return bucket_index < minBucketIndex;
+										return bucket_index <= minBucketIndex;
 								});
 							mid = pmid - (&primInfo[0]);
 						}else{
@@ -130,7 +132,7 @@ BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_node
 								size_t index = primInfo[i].primIndex;
 								orderedPrims.push_back(primitives[index]);
 							}
-							node->initLeaf(start, nPrims, bounds);	
+							node->initLeaf(firstPrimIndex, nPrims, bounds);	
 							return node;						
 						}
 					}

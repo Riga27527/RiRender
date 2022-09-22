@@ -24,12 +24,17 @@ struct Interaction{
 class SurfaceInteraction : public Interaction{
 public:
 	SurfaceInteraction(){}
-	SurfaceInteraction(const Point3f& p, const Vec3f& wo, float t, const Shape* sh)
-		: Interaction(p, wo, t), shape(sh){}
+	SurfaceInteraction(const Point3f& p, const Normal3f& n, const Vec3f& wo, float t, 
+		const Point2f& UV, const Shape* sh);
 	void computeScatteringFunctions();
+	void setShadingInfo(const Normal3f& shadingNormal);
 
 	const Shape* shape = nullptr;
 	const Primitive* primitive = nullptr;
+	Point2f uv;
+	struct{
+		Normal3f n;
+	}shading;
 };
 
 RIGA_NAMESPACE_END

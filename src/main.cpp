@@ -74,7 +74,7 @@ void render_ppm(int width, int height){
 
 void OBJ_loader_BVH_test(int width, int height){
 	Transform Tri_obj2wor, Tri_wor2obj;
-	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 0.f)) * Scale(Vec3f(15.f, 15.f, 15.f));
+	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 0.f)) * Scale(Vec3f(20.f, 20.f, 20.f));
 	// int tri_num = 2, point_num = 6;
 	// const Point3f mesh_p[] = {
 	// 	Point3f(-1.f, 1.f, 0.f), Point3f(0.f, 1.f, 0.f), Point3f(1.f, 1.f, 0.f),
@@ -106,8 +106,14 @@ void OBJ_loader_BVH_test(int width, int height){
 			Ray r(ray_o, Normalize(pos - ray_o));
 
 			framebuffer[m] = Vec3f(1.f, 1.f, 1.f);
-			if(agg->intersectP(r))
-				framebuffer[m] = Vec3f(1.f, 0.f, 0.f);
+			SurfaceInteraction* inter = new SurfaceInteraction();
+			if(agg->intersect(r, inter)){
+				Vec3f normal = Vec3f(inter->shading.n);
+				// Vec3f normal_color = (normal + 1.f) / 2.f;
+				Vec3f normal_color = Abs(normal);
+				framebuffer[m] = normal_color;
+			}
+			delete inter;
 			// for(size_t k=0; k<tri_mesh.size(); ++k){
 			// 	if(tri_mesh[k]->intersectP(r)){
 			// 		framebuffer[m] = Vec3f(1.f, 0.f, 0.f);
@@ -210,6 +216,6 @@ int main(int argc, char const *argv[])
 
 	// render_ppm(200, 200);
 
-	OBJ_loader_BVH_test(200, 200);
+	OBJ_loader_BVH_test(800, 800);
 	return 0;
 }

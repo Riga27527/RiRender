@@ -131,9 +131,9 @@ WavefrontOBJ::WavefrontOBJ(const Transform& Obj2Wor, const std::string& filePath
 }
 
 Bounds3f Triangle::worldBound() const{
-	const Point3f& v0 = mesh->p[v[0]];
-	const Point3f& v1 = mesh->p[v[1]];
-	const Point3f& v2 = mesh->p[v[2]];
+	const Point3f& v0 = mesh->p[vIndex[0]];
+	const Point3f& v1 = mesh->p[vIndex[1]];
+	const Point3f& v2 = mesh->p[vIndex[2]];
 	return Union(Bounds3f(v0, v1), v2);
 }
 
@@ -143,9 +143,9 @@ Bounds3f Triangle::objectBound() const{
 
 bool Triangle::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) const{
 	// Moller Trumbore
-	const Point3f& v0 = mesh->p[v[0]];
-	const Point3f& v1 = mesh->p[v[1]];
-	const Point3f& v2 = mesh->p[v[2]];	
+	const Point3f& v0 = mesh->p[vIndex[0]];
+	const Point3f& v1 = mesh->p[vIndex[1]];
+	const Point3f& v2 = mesh->p[vIndex[2]];	
 
 	Vec3f e1 = v1 - v0, e2 = v2 - v0;
 	Vec3f s1 = Cross(ray.dir, e2);
@@ -174,16 +174,34 @@ bool Triangle::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect)
 		return false;
 
 	*tHit = t;
-	// Point3f pHit = ray.at(t);
-	// *isect = (*object2World)(SurfaceInteraction(pHit, -ray.dir, ray.time, this));
+	Point2f uv(u, v);
+	Vec3f bary(1.f - u - v, u, v);
+
+	Point3f pHit = v0 * bary.x + v1 * bary.y + v2 * bary.z;
+	Normal3f geo_normal = Normal3f(Normalize(Cross((v1 - v0), (v2 - v0))));
+	if(mesh->uv){
+		Point2f uv0 = mesh->uv[vIndex[0]];
+		Point2f uv1 = mesh->uv[vIndex[1]];
+		Point2f uv2 = mesh->uv[vIndex[2]];
+		uv = uv0 * bary.x + uv1 * bary.y + uv2 * bary.z;
+	}
+
+	*isect = SurfaceInteraction(pHit, geo_normal, -ray.dir, ray.time, uv, this);
+	if(mesh->n){
+		Normal3f n0 = mesh->n[vIndex[0]];
+		Normal3f n1 = mesh->n[vIndex[1]];
+		Normal3f n2 = mesh->n[vIndex[2]];
+		Normal3f shading_normal = Normalize(n0 * bary.x + n1 * bary.y + n2 * bary.z);
+		isect->setShadingInfo(shading_normal);
+	}
 	return true;
 }
 
 bool Triangle::intersectP(const Ray& ray) const{
 	// Moller Trumbore
-	const Point3f& v0 = mesh->p[v[0]];
-	const Point3f& v1 = mesh->p[v[1]];
-	const Point3f& v2 = mesh->p[v[2]];	
+	const Point3f& v0 = mesh->p[vIndex[0]];
+	const Point3f& v1 = mesh->p[vIndex[1]];
+	const Point3f& v2 = mesh->p[vIndex[2]];	
 
 	Vec3f e1 = v1 - v0, e2 = v2 - v0;
 	Vec3f s1 = Cross(ray.dir, e2);
@@ -215,9 +233,9 @@ bool Triangle::intersectP(const Ray& ray) const{
 }
 
 float Triangle::Area() const{
-	const Point3f& v0 = mesh->p[v[0]];
-	const Point3f& v1 = mesh->p[v[1]];
-	const Point3f& v2 = mesh->p[v[2]];
+	const Point3f& v0 = mesh->p[vIndex[0]];
+	const Point3f& v1 = mesh->p[vIndex[1]];
+	const Point3f& v2 = mesh->p[vIndex[2]];
 	return 0.5f * Cross(v1 - v0, v2 - v0).length();
 }
 

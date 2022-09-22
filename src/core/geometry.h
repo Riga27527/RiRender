@@ -150,6 +150,8 @@ public:
 
 	// Point3 -> Vec3
 	explicit Vec3<T>(const Point3<T>& p) : x(p.x), y(p.y), z(p.z){}
+	// Normal3 -> Vec3
+	explicit Vec3<T>(const Normal3<T>& n) : x(n.x), y(n.y), z(n.z){}
 
 	Vec3<T>& operator+=(const Vec3<T> &vec){
 		x += vec.x;
@@ -570,7 +572,7 @@ public:
 	}
 
 	Normal3<T> operator+(const Normal3<T> &vec) const{
-		return Vec3<T>(x+vec.x, y+vec.y, z+vec.z);
+		return Normal3<T>(x+vec.x, y+vec.y, z+vec.z);
 	}
 
 	Normal3<T>& operator-=(const Normal3<T> &vec){

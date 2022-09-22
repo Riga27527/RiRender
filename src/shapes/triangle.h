@@ -77,7 +77,7 @@ public:
 	Triangle(const Transform* obj2wor, const Transform* wor2obj, bool reverseOrient,
 		const std::shared_ptr<TriangleMesh>& m, size_t triIndex) 
 		: Shape(obj2wor, wor2obj, reverseOrient), mesh(m){
-		v = &mesh->vertexIndices[triIndex * 3];
+		vIndex = &mesh->vertexIndices[triIndex * 3];
 		faceIndex = mesh->faceIndices.size() ? mesh->faceIndices[triIndex] : 0;
 		triMeshBytes += sizeof(*this);
 	}
@@ -89,7 +89,7 @@ public:
 
 private:
 	std::shared_ptr<TriangleMesh> mesh;
-	const int* v;
+	const int* vIndex;
 	int faceIndex;
 };
 

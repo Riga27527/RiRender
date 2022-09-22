@@ -81,7 +81,7 @@ void OBJ_loader_BVH_test(int width, int height){
 	// 	Point3f(-1.f, -1.f, 0.f), Point3f(0.f, -1.f, 0.f), Point3f(1.f, -1.f, 0.f)
 	// };
 	// const int mesh_vInds[] = {0, 3, 1, 2, 4, 5};
-
+	Vec3f light(1.0, 1.0, 1.0);
 	std::string obj_path("/home/cs18/Rider/scenes/obj/bunny.obj"); 
 	std::vector<std::shared_ptr<Shape>> tri_mesh =
 		CreateOBJMesh(&Tri_obj2wor, &Tri_wor2obj, false, obj_path);
@@ -105,12 +105,12 @@ void OBJ_loader_BVH_test(int width, int height){
 			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
 			Ray r(ray_o, Normalize(pos - ray_o));
 
-			framebuffer[m] = Vec3f(1.f, 1.f, 1.f);
+			framebuffer[m] = Vec3f(0.f, 0.f, 0.f);
 			SurfaceInteraction* inter = new SurfaceInteraction();
 			if(agg->intersect(r, inter)){
 				Vec3f normal = Vec3f(inter->shading.n);
 				// Vec3f normal_color = (normal + 1.f) / 2.f;
-				Vec3f normal_color = Abs(normal);
+				Vec3f normal_color = Vec3f(0.f, std::abs(Dot(light, normal)), 0.f);
 				framebuffer[m] = normal_color;
 			}
 			delete inter;

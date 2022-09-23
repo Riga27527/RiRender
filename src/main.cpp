@@ -7,6 +7,7 @@
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
 #include "accelerators/bvh.h"
+#include "core/spectrum.h"
 
 using namespace riga;
 
@@ -91,7 +92,7 @@ void OBJ_loader_BVH_test(int width, int height){
 		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]));
 	std::shared_ptr<Aggregate> agg = std::make_shared<BVH>(prims);
 
-	std::vector<Vec3f> framebuffer(width * height);
+	std::vector<RGBSpectrum> framebuffer(width * height);
 	Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
 	Point3f ray_o(0.f, 0.f, 4.f);
 	Vec3f horizontal(4.f, 0.f, 0.f);
@@ -105,13 +106,12 @@ void OBJ_loader_BVH_test(int width, int height){
 			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
 			Ray r(ray_o, Normalize(pos - ray_o));
 
-			framebuffer[m] = Vec3f(0.f, 0.f, 0.f);
+			framebuffer[m] = RGBSpectrum(0.f);
 			SurfaceInteraction* inter = new SurfaceInteraction();
 			if(agg->intersect(r, inter)){
 				Vec3f normal = Vec3f(inter->shading.n);
 				// Vec3f normal_color = (normal + 1.f) / 2.f;
-				Vec3f normal_color = Vec3f(0.f, std::abs(Dot(light, normal)), 0.f);
-				framebuffer[m] = normal_color;
+				framebuffer[m][1] = std::abs(Dot(light, normal));
 			}
 			delete inter;
 			// for(size_t k=0; k<tri_mesh.size(); ++k){
@@ -128,9 +128,9 @@ void OBJ_loader_BVH_test(int width, int height){
     (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
     for (auto i = 0; i < height * width; ++i) {
         static unsigned char color[3];
-        color[0] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].x));
-        color[1] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].y));
-        color[2] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i].z));
+        color[0] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i][0]));
+        color[1] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i][1]));
+        color[2] = (unsigned char)(255 * Clamp(0, 1, framebuffer[i][2]));
         fwrite(color, 1, 3, fp);
     }
     fclose(fp); 

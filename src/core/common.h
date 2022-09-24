@@ -45,15 +45,20 @@ class Bounds2;
 template <class T>
 class Bounds3;
 
+template<int nSamples>
+class CoefficientSpectrum;
+class RGBSpecturm;
+typedef RGBSpecturm Spectrum;
+
 class Transform;
 class Shape;
 class Primitive;
 class GeometricPrimitive;
 struct Interaction;
 class SurfaceInteraction;
-class Sphere;
-struct TriangleMesh;
-class Triangle;
+class Camera;
+struct CameraSample;
+class ProjectiveCamera;
 
 template <class T>
 bool isNaN(const T x){

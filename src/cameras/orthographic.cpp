@@ -26,7 +26,11 @@ OrthographicCamera* CreateOrthographicCamera(const Transform& cam2wor, const Vec
 		screenWindow.pMin.y = -1.f / frameRatio;
 		screenWindow.pMax.y = 1.f / frameRatio;		
 	}
-
+	float screenScale = 2.f;
+	{
+		screenWindow.pMin *= screenScale;
+		screenWindow.pMax *= screenScale;
+	}
 	return new OrthographicCamera(cam2wor, screenWindow, resolution);
 }
 

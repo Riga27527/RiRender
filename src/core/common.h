@@ -47,8 +47,8 @@ class Bounds3;
 
 template<int nSamples>
 class CoefficientSpectrum;
-class RGBSpecturm;
-typedef RGBSpecturm Spectrum;
+class RGBSpectrum;
+typedef RGBSpectrum Spectrum;
 
 class Transform;
 class Shape;
@@ -82,9 +82,14 @@ inline float Clamp(float x, float small, float large){
 	return std::min(std::max(x, small), large);
 }
 
+inline float random_float(){
+	return rand() / (RAND_MAX + 1.0f);
+}
+
 std::vector<std::string> tokenize(const std::string &string, const std::string &delim, bool includeEmpty);
 
 // Convert a string into an unsigned integer value
 unsigned int toUInt(const std::string &str);
+
 
 RIGA_NAMESPACE_END

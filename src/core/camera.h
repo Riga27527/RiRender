@@ -25,10 +25,12 @@ public:
 		: Camera(cam2wor), camera2screen(cam2screen){
 			screen2raster = 
 			Scale(resolution.x, resolution.y, 1) *
-			Scale(1.f / (screenWindow.diagnoal().x), - 1.f / (screenWindow.diagnoal().y), 1) *
+			Scale(1.f / (screenWindow.pMax.x - screenWindow.pMin.x), 
+				- 1.f / (screenWindow.pMax.y - screenWindow.pMin.y), 1) *
 			Translate(Vec3f(-screenWindow.pMin.x, -screenWindow.pMax.y, 0));
 			raster2screen = Inverse(screen2raster);
 			raster2camera = Inverse(camera2screen) * raster2screen;
+
 		}
 protected:
 	Transform camera2screen, screen2raster;

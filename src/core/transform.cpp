@@ -105,10 +105,10 @@ Transform Scale(const Vec3f& v){
 			  0.f, v.y, 0.f, 0.f,
 			  0.f, 0.f, v.z, 0.f,
 			  0.f, 0.f, 0.f, 1.f);
-	Mat4x4f mInv(v.x, 0.f, 0.f, 0.f,
-			  0.f, v.y, 0.f, 0.f,
-			  0.f, 0.f, v.z, 0.f,
-			  0.f, 0.f, 0.f, 1.f);	
+	Mat4x4f mInv(1.f / v.x, 0.f, 		0.f, 		0.f,
+			  	 0.f, 		1.f / v.y, 	0.f, 		0.f,
+			  	 0.f, 		0.f, 		1.f / v.z, 	0.f,
+			  	 0.f, 		0.f, 		0.f, 		1.f);	
 	return Transform(m, mInv);
 }
 

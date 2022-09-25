@@ -2,13 +2,16 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <type_traits>
 #include "core/geometry.h"
 #include "core/transform.h"
+#include "core/common.h"
 #include "shapes/sphere.h"
 #include "shapes/triangle.h"
 #include "accelerators/bvh.h"
 #include "core/spectrum.h"
-
+#include "cameras/perspective.h"
+#include "cameras/orthographic.h"
 using namespace riga;
 
 void render_ppm(int width, int height){
@@ -18,7 +21,7 @@ void render_ppm(int width, int height){
 	// std::shared_ptr<Shape> sphere = std::make_shared<Sphere>(&sphereT_obj2wor, &sphereT_wor2obj, false, 1.f);
 
 	Transform Tri_obj2wor, Tri_wor2obj;
-	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(1.0f, 1.f, 0.f));
+	// Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(1.0f, 1.f, 0.f));
 	int tri_num = 2, point_num = 6;
 	const Point3f mesh_p[] = {
 		Point3f(-1.f, 1.f, 0.f), Point3f(0.f, 1.f, 0.f), Point3f(1.f, 1.f, 0.f),
@@ -31,19 +34,27 @@ void render_ppm(int width, int height){
 	nullptr, nullptr, nullptr, nullptr);
 
 	std::vector<Vec3f> framebuffer(width * height);
-	Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
-	Point3f ray_o(0.f, 0.f, 4.f);
-	Vec3f horizontal(4.f, 0.f, 0.f);
-	Vec3f vertical(0.f, 4.f, 0.f);
+	Camera* cam;
+	Point3f eye(0.f, 0.f, -2.f), look(0.f, 0.f, 0.f);
+	Vec3f up(0.f, 1.f, 0.f);
+	Transform lookAt = LookAt(eye, look, up);
+	Transform cam2wor = Inverse(lookAt);
+	float fov = 90.f;
+	cam = CreateOrthographicCamera(cam2wor, Vec2f(width, height));
+
+	// Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
+	// Point3f ray_o(0.f, 0.f, 4.f);
+	// Vec3f horizontal(4.f, 0.f, 0.f);
+	// Vec3f vertical(0.f, 4.f, 0.f);
 	int m = 0;
 	// std::cout << tri_mesh.size() << std::endl;
-	for(int i=height-1; i>=0; --i){
+	for(int i=0; i<height; ++i){
 		for(int j=0; j<width; ++j){	
-			float u = (j + 0.5) / (width - 1);
-			float v = (i + 0.5) / (height - 1);
-			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
-			Ray r(ray_o, Normalize(pos - ray_o));
-
+			CameraSample cs;
+			cs.samplePoints = Point2f(j + random_float(), i + random_float());
+			Ray r;
+			cam->generateRay(cs, &r);
+			
 			framebuffer[m] = Vec3f(1.f, 1.f, 1.f);
 			for(size_t k=0; k<tri_mesh.size(); ++k){
 				if(tri_mesh[k]->intersectP(r)){
@@ -60,7 +71,7 @@ void render_ppm(int width, int height){
 	}
 
 
-    FILE* fp = fopen("binary.ppm", "wb");
+    FILE* fp = fopen("binary_tri.ppm", "wb");
     (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
     for (auto i = 0; i < height * width; ++i) {
         static unsigned char color[3];
@@ -74,14 +85,10 @@ void render_ppm(int width, int height){
 
 
 void OBJ_loader_BVH_test(int width, int height){
+	// std::cout << std::is_same<RGBSpecturm, Spectrum>::value << std::endl;
 	Transform Tri_obj2wor, Tri_wor2obj;
-	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 0.f)) * Scale(Vec3f(20.f, 20.f, 20.f));
-	// int tri_num = 2, point_num = 6;
-	// const Point3f mesh_p[] = {
-	// 	Point3f(-1.f, 1.f, 0.f), Point3f(0.f, 1.f, 0.f), Point3f(1.f, 1.f, 0.f),
-	// 	Point3f(-1.f, -1.f, 0.f), Point3f(0.f, -1.f, 0.f), Point3f(1.f, -1.f, 0.f)
-	// };
-	// const int mesh_vInds[] = {0, 3, 1, 2, 4, 5};
+	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 0.f)) * RotateY(180) * Scale(Vec3f(15.f, 15.f, 15.f));
+
 	Vec3f light(1.0, 1.0, 1.0);
 	std::string obj_path("/home/cs18/Rider/scenes/obj/bunny.obj"); 
 	std::vector<std::shared_ptr<Shape>> tri_mesh =
@@ -92,39 +99,34 @@ void OBJ_loader_BVH_test(int width, int height){
 		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]));
 	std::shared_ptr<Aggregate> agg = std::make_shared<BVH>(prims);
 
-	std::vector<RGBSpectrum> framebuffer(width * height);
-	Point3f lower_let_corner(-2.0f, -2.0f, 2.0f);
-	Point3f ray_o(0.f, 0.f, 4.f);
-	Vec3f horizontal(4.f, 0.f, 0.f);
-	Vec3f vertical(0.f, 4.f, 0.f);
+	std::vector<Spectrum> framebuffer(width * height);
+	Camera* cam;
+	Point3f eye(0.f, 0.f, -3.f), look(0.f, 0.f, 0.f);
+	Vec3f up(0.f, 1.f, 0.f);
+	Transform lookAt = LookAt(eye, look, up);
+	Transform cam2wor = Inverse(lookAt);
+	float fov = 90.f;
+	cam = CreateOrthographicCamera(cam2wor, Vec2f(width, height));
+
 	int m = 0;
 	// std::cout << tri_mesh.size() << std::endl;
-	for(int i=height-1; i>=0; --i){
+	for(int i=0; i<height; ++i){
 		for(int j=0; j<width; ++j){	
-			float u = (j + 0.5) / (width - 1);
-			float v = (i + 0.5) / (height - 1);
-			Point3f pos = lower_let_corner + u * horizontal + v * vertical;
-			Ray r(ray_o, Normalize(pos - ray_o));
-
-			framebuffer[m] = RGBSpectrum(0.f);
-			SurfaceInteraction* inter = new SurfaceInteraction();
-			if(agg->intersect(r, inter)){
-				Vec3f normal = Vec3f(inter->shading.n);
-				// Vec3f normal_color = (normal + 1.f) / 2.f;
-				framebuffer[m][1] = std::abs(Dot(light, normal));
+			CameraSample cs;
+			cs.samplePoints = Point2f(j + random_float(), i + random_float());
+			Ray r;
+			cam->generateRay(cs, &r);
+			SurfaceInteraction inter;
+			Spectrum Li;
+			if(agg->intersect(r, &inter)){
+				Vec3f normal = Vec3f(inter.shading.n);
+				Li[1] = std::abs(Dot(light, normal));
 			}
-			delete inter;
-			// for(size_t k=0; k<tri_mesh.size(); ++k){
-			// 	if(tri_mesh[k]->intersectP(r)){
-			// 		framebuffer[m] = Vec3f(1.f, 0.f, 0.f);
-			// 		break;
-			// 	}
-			// }
-			++m;
+			framebuffer[m++] = Li;
 		}
 	}
 
-    FILE* fp = fopen("binary.ppm", "wb");
+    FILE* fp = fopen("binary_ortho.ppm", "wb");
     (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
     for (auto i = 0; i < height * width; ++i) {
         static unsigned char color[3];
@@ -134,8 +136,6 @@ void OBJ_loader_BVH_test(int width, int height){
         fwrite(color, 1, 3, fp);
     }
     fclose(fp); 
-
-
 }
 
 int main(int argc, char const *argv[])
@@ -214,8 +214,18 @@ int main(int argc, char const *argv[])
 	// bool neg[3] = {0, 0, 0};
 	// std::cout << b.intersectP(r, Vec3f(5.f, 5.f, 5.f), neg) << std::endl;
 
-	// render_ppm(200, 200);
-
+	// render_ppm(400, 400);
+	// Mat4x4f m{400.f, 0.f, 0.f, 400.f,
+	// 		  0.f, -400.f, 0.f, 400.f,
+	// 		  0.f, 0.f, 1.f, 0.f,
+	// 		  0.f, 0.f, 0.f, 1.f};
+	// std::cout << Inverse(m) << std::endl;
+	// Transform trans(m);
+	// std::cout << trans << std::endl;
+	// std::cout << "-------------------" << std::endl;
+	// std::cout << Inverse(trans) << std::endl;
 	OBJ_loader_BVH_test(800, 800);
+
+	// std::cout << std::is_same<Vec3<int>, Vec3i>::value << std::endl;
 	return 0;
 }

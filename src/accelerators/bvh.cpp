@@ -30,7 +30,7 @@ BVH::BVH(std::vector<std::shared_ptr<Primitive>> prims,
 	flattenBVHTree(node, &offset);
 }
 
-BVH::~BVH(){}
+BVH::~BVH(){delete [] root;}
 
 BVHNode* BVH::recursiveBuild(std::vector<BVHPrimInfo>& primInfo, int* total_nodes,
 	int start, int end, std::vector<std::shared_ptr<Primitive>>& orderedPrims){

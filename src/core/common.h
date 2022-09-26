@@ -59,6 +59,7 @@ class SurfaceInteraction;
 class Camera;
 struct CameraSample;
 class ProjectiveCamera;
+class Scene;
 
 template <class T>
 bool isNaN(const T x){

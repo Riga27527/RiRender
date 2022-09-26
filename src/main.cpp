@@ -10,8 +10,11 @@
 #include "shapes/triangle.h"
 #include "accelerators/bvh.h"
 #include "core/spectrum.h"
+#include "core/scene.h"
 #include "cameras/perspective.h"
 #include "cameras/orthographic.h"
+
+
 using namespace riga;
 
 void render_ppm(int width, int height){
@@ -97,7 +100,8 @@ void OBJ_loader_BVH_test(int width, int height){
 	std::vector<std::shared_ptr<Primitive>> prims;
 	for(size_t i=0; i<tri_mesh.size(); ++i)
 		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]));
-	std::shared_ptr<Aggregate> agg = std::make_shared<BVH>(prims);
+	std::unique_ptr<Aggregate> agg = std::make_unique<BVH>(prims);
+	std::unique_ptr<Scene> scene = std::make_unique<Scene>(std::move(agg));
 
 	std::vector<Spectrum> framebuffer(width * height);
 	Camera* cam;
@@ -118,7 +122,7 @@ void OBJ_loader_BVH_test(int width, int height){
 			cam->generateRay(cs, &r);
 			SurfaceInteraction inter;
 			Spectrum Li;
-			if(agg->intersect(r, &inter)){
+			if(scene->intersect(r, &inter)){
 				Vec3f normal = Vec3f(inter.shading.n);
 				Li[1] = std::abs(Dot(light, normal));
 			}

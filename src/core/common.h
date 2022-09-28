@@ -30,6 +30,8 @@ static constexpr float INV_FOURPI   = 0.07957747154594766788f;
 static constexpr float SQRT_TWO     = 1.41421356237309504880f;
 static constexpr float INV_SQRT_TWO = 0.70710678118654752440f;
 
+static const float OneMinusEpsilon = 0.99999994;
+
 template <class T>
 class Vec2;
 template <class T>
@@ -83,6 +85,13 @@ inline float Clamp(float x, float small, float large){
 	return std::min(std::max(x, small), large);
 }
 
+template <typename T>
+inline T Mod(T a, T b) {
+    T result = a - (a / b) * b;
+    return (T)((result < 0) ? result + b : result);
+}
+
+// need delete--------------------------------------****************************------------------
 inline float random_float(){
 	return rand() / (RAND_MAX + 1.0f);
 }
@@ -92,5 +101,16 @@ std::vector<std::string> tokenize(const std::string &string, const std::string &
 // Convert a string into an unsigned integer value
 unsigned int toUInt(const std::string &str);
 
+inline int CountTrailingZeros(uint32_t v) {
+#if defined(MSVC)
+    unsigned long index;
+    if (_BitScanForward(&index, v))
+        return index;
+    else
+        return 32;
+#else
+    return __builtin_ctz(v);
+#endif
+}
 
 RIGA_NAMESPACE_END

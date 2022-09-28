@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDRAD 17)
 set(CMAKE_CXX_STANDRAD_REQUIRED ON)
 
 project(Rider LANGUAGES CXX C)
-# add_subdirectory(ext ext_build)
+add_subdirectory(ext ext_build)
 
 if (PROJECT_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
 	message(WARNING "The binary directory of CMake cannot be the same as source directory!")
@@ -24,7 +24,28 @@ file(GLOB source_files CONFIGURE_DEPENDS
 	src/core/*
 	src/integrators/*
 	src/materials/*
-	src/shapes/*)
+	src/shapes/*
+	src/samplers/*)
+
+include_directories(
+	${PCG32_INCLUDE_DIR}
+)
+
+INCLUDE (CheckCXXSourceCompiles)
+INCLUDE (CheckCXXSourceRuns)
+
+CHECK_CXX_SOURCE_COMPILES (
+"__attribute__((noinline)) void foo() { }
+int main() { }"
+HAVE_ATTRIBUTE_NOINLINE )
+
+IF ( HAVE_ATTRIBUTE_NOINLINE )
+  ADD_DEFINITIONS ( -D "RIDER_NOINLINE=__attribute__\\(\\(noinline\\)\\)" )
+ELSEIF ( HAVE_DECLSPEC_NOINLINE )
+  ADD_DEFINITIONS ( -D "RIDER_NOINLINE=__declspec(noinline)" )
+ELSE ()
+  ADD_DEFINITIONS ( -D RIDER_NOINLINE )
+ENDIF ()
 
 # add_library(Rider_lib STATIC ${source_files})
 add_executable(Rider src/main.cpp)

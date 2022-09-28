@@ -13,7 +13,7 @@
 #include "core/scene.h"
 #include "cameras/perspective.h"
 #include "cameras/orthographic.h"
-
+#include "./samplers/halton.h"
 
 using namespace riga;
 
@@ -228,8 +228,8 @@ int main(int argc, char const *argv[])
 	// std::cout << trans << std::endl;
 	// std::cout << "-------------------" << std::endl;
 	// std::cout << Inverse(trans) << std::endl;
-	OBJ_loader_BVH_test(800, 800);
-
+	// OBJ_loader_BVH_test(800, 800);
+	// test_pcg();
 	// std::cout << std::is_same<Vec3<int>, Vec3i>::value << std::endl;
 	return 0;
 }

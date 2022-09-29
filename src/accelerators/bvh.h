@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/primitive.h"
+#include "primitive.h"
 
 RIGA_NAMESPACE_BEGIN
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/shape.h"
+#include "shape.h"
 #include <string>
 #include <unordered_map>
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "../core/common.h"
-#include "../core/sampling.h"
-#include "../core/geometry.h"
+#include "common.h"
+#include "sampling.h"
+#include "geometry.h"
 #include <pcg32.h>
 
 RIGA_NAMESPACE_BEGIN

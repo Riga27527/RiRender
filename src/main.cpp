@@ -3,17 +3,17 @@
 #include <memory>
 #include <fstream>
 #include <type_traits>
-#include "core/geometry.h"
-#include "core/transform.h"
-#include "core/common.h"
-#include "shapes/sphere.h"
-#include "shapes/triangle.h"
-#include "accelerators/bvh.h"
-#include "core/spectrum.h"
-#include "core/scene.h"
-#include "cameras/perspective.h"
-#include "cameras/orthographic.h"
-#include "./samplers/halton.h"
+#include "geometry.h"
+#include "transform.h"
+#include "common.h"
+#include "sphere.h"
+#include "triangle.h"
+#include "bvh.h"
+#include "spectrum.h"
+#include "scene.h"
+#include "perspective.h"
+#include "orthographic.h"
+#include "halton.h"
 
 using namespace riga;
 

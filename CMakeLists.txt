@@ -25,7 +25,8 @@ file(GLOB source_files CONFIGURE_DEPENDS
 	src/integrators/*
 	src/materials/*
 	src/shapes/*
-	src/samplers/*)
+	src/samplers/*
+	)
 
 include_directories(
 	${PCG32_INCLUDE_DIR}
@@ -47,10 +48,16 @@ ELSE ()
   ADD_DEFINITIONS ( -D RIDER_NOINLINE )
 ENDIF ()
 
-# add_library(Rider_lib STATIC ${source_files})
-add_executable(Rider src/main.cpp)
-target_sources(Rider PUBLIC ${source_files})
-# target_link_libraries(Rider PUBLIC Rider_lib)
+add_executable(Rider src/main.cpp ${source_files})
+target_include_directories(Rider PUBLIC
+	src/accelerators
+	src/cameras
+	src/core
+	src/integrators
+	src/materials
+	src/shapes
+	src/samplers
+	)
 
 find_package(TBB REQUIRED)
 target_link_libraries(Rider PUBLIC TBB::tbb)

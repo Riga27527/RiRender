@@ -1,5 +1,5 @@
 #include "halton.h"
-#include "../core/geometry.h"
+#include "geometry.h"
 #include <pcg32.h>
 
 RIGA_NAMESPACE_BEGIN

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../core/shape.h"
+#include "shape.h"
 
 RIGA_NAMESPACE_BEGIN
 

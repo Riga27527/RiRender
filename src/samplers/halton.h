@@ -1,5 +1,6 @@
-#include "../core/common.h"
-#include "../core/sampler.h"
+#pragma once
+#include "common.h"
+#include "sampler.h"
 #include "lowdiscrepancy.h"
 
 RIGA_NAMESPACE_BEGIN

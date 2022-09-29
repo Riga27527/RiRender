@@ -12,9 +12,9 @@ float OrthographicCamera::generateRay(const CameraSample& sample, Ray* ray) cons
 	return 1;
 }
 
-OrthographicCamera* CreateOrthographicCamera(const Transform& cam2wor, const Vec2f& resolution){
+OrthographicCamera* CreateOrthographicCamera(const Transform& cam2wor, Film* film){
 	Bounds2f screenWindow;
-	float frameRatio = resolution.x / resolution.y;
+	float frameRatio = film->fullResolution.x / film->fullResolution.y;
 	if(frameRatio > 1.f){
 		screenWindow.pMin.x = -frameRatio;
 		screenWindow.pMax.x = frameRatio;
@@ -31,7 +31,7 @@ OrthographicCamera* CreateOrthographicCamera(const Transform& cam2wor, const Vec
 		screenWindow.pMin *= screenScale;
 		screenWindow.pMax *= screenScale;
 	}
-	return new OrthographicCamera(cam2wor, screenWindow, resolution);
+	return new OrthographicCamera(cam2wor, screenWindow, film);
 }
 
 RIGA_NAMESPACE_END

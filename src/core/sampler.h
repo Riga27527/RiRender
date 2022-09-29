@@ -10,20 +10,20 @@ class Sampler{
     // Sampler Interface
     virtual ~Sampler();
     Sampler(int64_t samplesPerPixel);
-    virtual void StartPixel(const Point2i &p);
-    virtual float Get1D() = 0;
-    virtual Point2f Get2D() = 0;
-    CameraSample GetCameraSample(const Point2i &pRaster);
-    void Request1DArray(int n);
-    void Request2DArray(int n);
-    virtual int RoundCount(int n) const { return n; }
-    const float *Get1DArray(int n);
-    const Point2f *Get2DArray(int n);
-    virtual bool StartNextSample();
-    virtual std::unique_ptr<Sampler> Clone(int seed) = 0;
-    virtual bool SetSampleNumber(int64_t sampleNum);
+    virtual void startPixel(const Point2i &p);
+    virtual float get1D() = 0;
+    virtual Point2f get2D() = 0;
+    CameraSample getCameraSample(const Point2i &pRaster);
+    void request1DArray(int n);
+    void request2DArray(int n);
+    virtual int roundCount(int n) const { return n; }
+    const float *get1DArray(int n);
+    const Point2f *get2DArray(int n);
+    virtual bool startNextSample();
+    virtual std::unique_ptr<Sampler> clone(int seed) = 0;
+    virtual bool setSampleNumber(int64_t sampleNum);
     
-    int64_t CurrentSampleNumber() const { return currentPixelSampleIndex; }
+    int64_t currentSampleNumber() const { return currentPixelSampleIndex; }
 
     friend std::ostream& operator<<(std::ostream& os, const Sampler& sampler){
     	return os << "(" << sampler.currentPixel.x << " ," << sampler.currentPixel.y << 
@@ -49,14 +49,14 @@ class Sampler{
 class GlobalSampler : public Sampler {
   public:
     // GlobalSampler Public Methods
-    bool StartNextSample();
-    void StartPixel(const Point2i &);
-    bool SetSampleNumber(int64_t sampleNum);
-    float Get1D();
-    Point2f Get2D();
     GlobalSampler(int64_t samplesPerPixel) : Sampler(samplesPerPixel) {}
-    virtual int64_t GetIndexForSample(int64_t sampleNum) const = 0;
-    virtual float SampleDimension(int64_t index, int dimension) const = 0;
+    bool startNextSample();
+    void startPixel(const Point2i &);
+    bool setSampleNumber(int64_t sampleNum);
+    float get1D();
+    Point2f get2D();
+    virtual int64_t getIndexForSample(int64_t sampleNum) const = 0;
+    virtual float sampleDimension(int64_t index, int dimension) const = 0;
 
   private:
     // GlobalSampler Private Data

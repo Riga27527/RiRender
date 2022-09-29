@@ -9,9 +9,9 @@ class HaltonSampler : public GlobalSampler{
     // HaltonSampler Public Methods
     HaltonSampler(int nsamp, const Bounds2i &sampleBounds,
                   bool sampleAtCenter = false);
-    int64_t GetIndexForSample(int64_t sampleNum) const;
-    float SampleDimension(int64_t index, int dimension) const;
-    std::unique_ptr<Sampler> Clone(int seed);
+    int64_t getIndexForSample(int64_t sampleNum) const;
+    float sampleDimension(int64_t index, int dimension) const;
+    std::unique_ptr<Sampler> clone(int seed);
 
   private:
     // HaltonSampler Private Data
@@ -27,11 +27,13 @@ class HaltonSampler : public GlobalSampler{
     bool sampleAtPixelCenter;
 
     // HaltonSampler Private Methods
-    const uint16_t *PermutationForDimension(int dim) const {
+    const uint16_t *permutationForDimension(int dim) const {
         if (dim >= PrimeTableSize)
             throw("HaltonSampler can only sample %d dimensions.", &PrimeTableSize);
         return &radicalInversePermutations[PrimeSums[dim]];
     }
 };
 
+HaltonSampler *CreateHaltonSampler(int pixelSamples, bool sampleAtCenter,
+                                   const Bounds2i &sampleBounds);
 RIGA_NAMESPACE_END

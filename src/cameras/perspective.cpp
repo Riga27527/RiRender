@@ -12,9 +12,9 @@ float PerspectiveCamera::generateRay(const CameraSample& sample, Ray* ray) const
 	return 1;
 }
 
-PerspectiveCamera* CreatePerspectiveCamera(const Transform& cam2wor, float fov, const Vec2f& resolution){
+PerspectiveCamera* CreatePerspectiveCamera(const Transform& cam2wor, float fov, Film* film){
 	Bounds2f screenWindow;
-	float frameRatio = resolution.x / resolution.y;
+	float frameRatio = film->fullResolution.x / film->fullResolution.y;
 	if(frameRatio > 1.f){
 		screenWindow.pMin.x = -frameRatio;
 		screenWindow.pMax.x = frameRatio;
@@ -26,7 +26,7 @@ PerspectiveCamera* CreatePerspectiveCamera(const Transform& cam2wor, float fov, 
 		screenWindow.pMin.y = -1.f / frameRatio;
 		screenWindow.pMax.y = 1.f / frameRatio;		
 	}
-	return new PerspectiveCamera(cam2wor, screenWindow, fov, resolution);
+	return new PerspectiveCamera(cam2wor, screenWindow, fov, film);
 }
 
 

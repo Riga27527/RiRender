@@ -58,7 +58,7 @@ HaltonSampler::HaltonSampler(int samplesPerPixel, const Bounds2i &sampleBounds,
 }
 
 std::vector<uint16_t> HaltonSampler::radicalInversePermutations;
-int64_t HaltonSampler::GetIndexForSample(int64_t sampleNum) const {
+int64_t HaltonSampler::getIndexForSample(int64_t sampleNum) const {
     if (currentPixel != pixelForOffset) {
         // Compute Halton sample offset for _currentPixel_
         offsetForCurrentPixel = 0;
@@ -80,7 +80,7 @@ int64_t HaltonSampler::GetIndexForSample(int64_t sampleNum) const {
     return offsetForCurrentPixel + sampleNum * sampleStride;
 }
 
-float HaltonSampler::SampleDimension(int64_t index, int dim) const {
+float HaltonSampler::sampleDimension(int64_t index, int dim) const {
     if (sampleAtPixelCenter && (dim == 0 || dim == 1)) return 0.5f;
     if (dim == 0)
         return RadicalInverse(dim, index >> baseExponents[0]);
@@ -88,10 +88,10 @@ float HaltonSampler::SampleDimension(int64_t index, int dim) const {
         return RadicalInverse(dim, index / baseScales[1]);
     else
         return ScrambledRadicalInverse(dim, index,
-                                       PermutationForDimension(dim));
+                                       permutationForDimension(dim));
 }
 
-std::unique_ptr<Sampler> HaltonSampler::Clone(int seed) {
+std::unique_ptr<Sampler> HaltonSampler::clone(int seed) {
     return std::unique_ptr<Sampler>(new HaltonSampler(*this));
 }
 

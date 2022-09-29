@@ -2,16 +2,20 @@
 
 #include "geometry.h"
 #include "transform.h"
+#include "film.h"
 
 RIGA_NAMESPACE_BEGIN
 
 class Camera{
 public:
-	Camera(const Transform& cam2wor) : camera2world(cam2wor){}
+	Camera(const Transform& cam2wor, Film* film) 
+	: camera2world(cam2wor), film(film){}
+	
 	virtual ~Camera(){}
 	virtual float generateRay(const CameraSample& sample, Ray *ray) const = 0;
 	
 	Transform camera2world;
+	Film* film;
 };
 
 struct CameraSample{
@@ -21,10 +25,10 @@ struct CameraSample{
 class ProjectiveCamera : public Camera{
 public:
 	ProjectiveCamera(const Transform& cam2wor, const Transform& cam2screen, 
-		const Bounds2f& screenWindow, const Vec2f& resolution)
-		: Camera(cam2wor), camera2screen(cam2screen){
+		const Bounds2f& screenWindow, Film* film)
+		: Camera(cam2wor, film), camera2screen(cam2screen){
 			screen2raster = 
-			Scale(resolution.x, resolution.y, 1) *
+			Scale(film->fullResolution.x, film->fullResolution.y, 1) *
 			Scale(1.f / (screenWindow.pMax.x - screenWindow.pMin.x), 
 				- 1.f / (screenWindow.pMax.y - screenWindow.pMin.y), 1) *
 			Translate(Vec3f(-screenWindow.pMin.x, -screenWindow.pMax.y, 0));

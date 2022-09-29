@@ -7,43 +7,43 @@ Sampler::~Sampler() {}
 
 Sampler::Sampler(int64_t samplesPerPixel) : samplesPerPixel(samplesPerPixel) {}
 
-CameraSample Sampler::GetCameraSample(const Point2i &pRaster) {
+CameraSample Sampler::getCameraSample(const Point2i &pRaster) {
     CameraSample cs;
-    cs.samplePoints = (Point2f)pRaster + Get2D();
+    cs.samplePoints = (Point2f)pRaster + get2D();
     return cs;
 }
 
-void Sampler::StartPixel(const Point2i &p) {
+void Sampler::startPixel(const Point2i &p) {
     currentPixel = p;
     currentPixelSampleIndex = 0;
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
 }
 
-bool Sampler::StartNextSample() {
+bool Sampler::startNextSample() {
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
     return ++currentPixelSampleIndex < samplesPerPixel;
 }
 
-bool Sampler::SetSampleNumber(int64_t sampleNum) {
+bool Sampler::setSampleNumber(int64_t sampleNum) {
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;
     currentPixelSampleIndex = sampleNum;
     return currentPixelSampleIndex < samplesPerPixel;
 }
 
-void Sampler::Request1DArray(int n) {
+void Sampler::request1DArray(int n) {
     samples1DArraySizes.push_back(n);
     sampleArray1D.push_back(std::vector<float>(n * samplesPerPixel));
 }
 
-void Sampler::Request2DArray(int n) {
+void Sampler::request2DArray(int n) {
     samples2DArraySizes.push_back(n);
     sampleArray2D.push_back(std::vector<Point2f>(n * samplesPerPixel));
 }
 
-const float *Sampler::Get1DArray(int n) {
+const float *Sampler::get1DArray(int n) {
     if (array1DOffset == sampleArray1D.size()) return nullptr;
     
     if((samples1DArraySizes[array1DOffset] != n) || (currentPixelSampleIndex > samplesPerPixel)) 
@@ -52,7 +52,7 @@ const float *Sampler::Get1DArray(int n) {
     return &sampleArray1D[array1DOffset++][currentPixelSampleIndex * n];
 }
 
-const Point2f *Sampler::Get2DArray(int n) {
+const Point2f *Sampler::get2DArray(int n) {
     if (array2DOffset == sampleArray2D.size()) return nullptr;
 
     if((samples2DArraySizes[array2DOffset] != n) || (currentPixelSampleIndex > samplesPerPixel)) 
@@ -61,10 +61,10 @@ const Point2f *Sampler::Get2DArray(int n) {
     return &sampleArray2D[array2DOffset++][currentPixelSampleIndex * n];
 }
 
-void GlobalSampler::StartPixel(const Point2i &p) {
-    Sampler::StartPixel(p);
+void GlobalSampler::startPixel(const Point2i &p) {
+    Sampler::startPixel(p);
     dimension = 0;
-    intervalSampleIndex = GetIndexForSample(0);
+    intervalSampleIndex = getIndexForSample(0);
     // Compute _arrayEndDim_ for dimensions used for array samples
     arrayEndDim =
         arrayStartDim + sampleArray1D.size() + 2 * sampleArray2D.size();
@@ -73,8 +73,8 @@ void GlobalSampler::StartPixel(const Point2i &p) {
     for (size_t i = 0; i < samples1DArraySizes.size(); ++i) {
         int nSamples = samples1DArraySizes[i] * samplesPerPixel;
         for (int j = 0; j < nSamples; ++j) {
-            int64_t index = GetIndexForSample(j);
-            sampleArray1D[i][j] = SampleDimension(index, arrayStartDim + i);
+            int64_t index = getIndexForSample(j);
+            sampleArray1D[i][j] = sampleDimension(index, arrayStartDim + i);
         }
     }
 
@@ -83,9 +83,9 @@ void GlobalSampler::StartPixel(const Point2i &p) {
     for (size_t i = 0; i < samples2DArraySizes.size(); ++i) {
         int nSamples = samples2DArraySizes[i] * samplesPerPixel;
         for (int j = 0; j < nSamples; ++j) {
-            int64_t idx = GetIndexForSample(j);
-            sampleArray2D[i][j].x = SampleDimension(idx, dim);
-            sampleArray2D[i][j].y = SampleDimension(idx, dim + 1);
+            int64_t idx = getIndexForSample(j);
+            sampleArray2D[i][j].x = sampleDimension(idx, dim);
+            sampleArray2D[i][j].y = sampleDimension(idx, dim + 1);
         }
         dim += 2;
     }
@@ -93,29 +93,29 @@ void GlobalSampler::StartPixel(const Point2i &p) {
     	throw("GlobalSampler::StartPixel get an error!");
 }
 
-bool GlobalSampler::StartNextSample() {
+bool GlobalSampler::startNextSample() {
     dimension = 0;
-    intervalSampleIndex = GetIndexForSample(currentPixelSampleIndex + 1);
-    return Sampler::StartNextSample();
+    intervalSampleIndex = getIndexForSample(currentPixelSampleIndex + 1);
+    return Sampler::startNextSample();
 }
 
-bool GlobalSampler::SetSampleNumber(int64_t sampleNum) {
+bool GlobalSampler::setSampleNumber(int64_t sampleNum) {
     dimension = 0;
-    intervalSampleIndex = GetIndexForSample(sampleNum);
-    return Sampler::SetSampleNumber(sampleNum);
+    intervalSampleIndex = getIndexForSample(sampleNum);
+    return Sampler::setSampleNumber(sampleNum);
 }
 
-float GlobalSampler::Get1D() {
+float GlobalSampler::get1D() {
     if (dimension >= arrayStartDim && dimension < arrayEndDim)
         dimension = arrayEndDim;
-    return SampleDimension(intervalSampleIndex, dimension++);
+    return sampleDimension(intervalSampleIndex, dimension++);
 }
 
-Point2f GlobalSampler::Get2D() {
+Point2f GlobalSampler::get2D() {
     if (dimension + 1 >= arrayStartDim && dimension < arrayEndDim)
         dimension = arrayEndDim;
-    Point2f p(SampleDimension(intervalSampleIndex, dimension),
-              SampleDimension(intervalSampleIndex, dimension + 1));
+    Point2f p(sampleDimension(intervalSampleIndex, dimension),
+              sampleDimension(intervalSampleIndex, dimension + 1));
     dimension += 2;
     return p;
 }

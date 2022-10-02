@@ -19,16 +19,14 @@ void SamplerIntegrator::render(const Scene& scene){
 			do{
 				CameraSample cs = pixel_sampler->getCameraSample(pixel);
 				// CameraSample cs;
-				cs.samplePoints = Point2f(j + random_float(), i + random_float());
+				// cs.samplePoints = Point2f(j + random_float(), i + random_float());
 				Ray r;
 				camera->generateRay(cs, &r);
 				SurfaceInteraction inter;
 				if(scene.intersect(r, &inter)){
-					Vec3f lightDir = light - inter.p;
+					Vec3f lightDir = Normalize(light - inter.p);
 					Vec3f normal = Normalize(Vec3f(inter.shading.n));
-					Ray shadowRay(inter.p, lightDir, 1.f-0.00001);
-					if(!scene.intersectP(shadowRay)){
-						lightDir.normalized();
+					// if(!scene.intersectP(inter.spawnRayTo(light))){
 						// diff
 						float diff = std::max(Dot(normal, lightDir), 0.f);
 
@@ -36,7 +34,7 @@ void SamplerIntegrator::render(const Scene& scene){
 						Vec3f halfVec = Normalize(lightDir + Normalize(-r.dir));
 						float spec = std::pow(std::max(Dot(halfVec, normal), 0.f), 32.f);
 						Li += Spectrum(0.2 + 0.4 * diff + 0.8 * spec);
-					}
+					// }
 				}
 			}while(pixel_sampler->startNextSample());
 			framebuffer[m++] = Li / (float)pixel_sampler->samplesPerPixel;

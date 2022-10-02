@@ -18,6 +18,7 @@ std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_cl
 #define TICK_TBB(x) auto bench_##x = tbb::tick_count::now();
 #define TOCK_TBB(x) std::cout << #x ": " << (tbb::tick_count::now() - bench_##x).seconds() << "s" << std::endl;
 
+#define MachineEpsilon (std::numeric_limits<float>::epsilon() * 0.5)
 #define Infinity std::numeric_limits<float>::infinity()
 // #define Epsilon  std::numeric_limits<float>::epsilon()
 
@@ -113,4 +114,7 @@ inline int CountTrailingZeros(uint32_t v) {
 #endif
 }
 
+inline float gamma(int n){
+	return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
+}
 RIGA_NAMESPACE_END

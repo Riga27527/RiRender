@@ -13,8 +13,20 @@ struct Interaction{
 	: p(p), wo(wo), time(t){}
 	Interaction(const Point3f& p, const Normal3f& n, const Vec3f& wo, float t)
 	: p(p), n(n), wo(wo), time(t){}
-	
-	
+	Ray spawnRay(const Vec3f& d2) const{
+		Point3f o = p + 0.1f * Vec3f(n);
+		return Ray(o, d2, Infinity, time);
+	}
+	Ray spawnRayTo(const Point3f& p2) const{
+		Point3f o = p + 0.1f * Vec3f(n);
+		Vec3f dir = p2 - o;
+		return Ray(o, dir, 1.f-0.00001, time);
+	}
+	Ray spawnRayTo(const Interaction& inter) const{
+		Point3f o = p + 0.1f * Vec3f(n);
+		Vec3f dir = inter.p - o;
+		return Ray(o, dir, 1.f-0.00001, time);		
+	}
 	float time = 0.f;
 	Point3f p;
 	Vec3f wo;

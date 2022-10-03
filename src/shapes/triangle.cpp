@@ -170,7 +170,7 @@ bool Triangle::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect)
 
 	// compute t
 	float t = Dot(s2, e2) * inv_det;
-	if(t > ray.tMax || t < 0)
+	if(t > ray.tMax || t < ray.tMin)
 		return false;
 
 	*tHit = t;
@@ -226,7 +226,7 @@ bool Triangle::intersectP(const Ray& ray) const{
 
 	// compute t
 	float t = Dot(s2, e2) * inv_det;
-	if(t > ray.tMax || t < 0)
+	if(t > ray.tMax || t < ray.tMin)
 		return false;
 
 	return true;

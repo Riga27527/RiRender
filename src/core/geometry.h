@@ -682,9 +682,9 @@ public:
 
 class Ray{
 public:
-	Ray() : tMax(Infinity), time(0.f){}
-	Ray(const Point3f& p, const Vec3f& d, float tMax = Infinity, float time = 0.f)
-	: o(p), dir(d), tMax(tMax), time(time){}
+	Ray() : tMax(Infinity), tMin(RayEpsilon), time(0.f){}
+	Ray(const Point3f& p, const Vec3f& d, float tMin = RayEpsilon, float tMax = Infinity, float time = 0.f)
+	: o(p), dir(d), tMin(tMin), tMax(tMax), time(time){}
 	Point3f at(float t) const{
 		return o + dir * t;
 	}
@@ -692,14 +692,15 @@ public:
 		return (o.hasNaN() || dir.hasNaN() || isNaN(tMax)); 
 	}
 	friend std::ostream& operator<<(std::ostream& os, const Ray& r){
-		os << "[o=" << r.o << ", dir=" << r.dir << ", tMax=" 
-		   << r.tMax << ", time=" << r.time << "]";
+		os << "[o=" << r.o << ", dir=" << r.dir << ", tMin=" 
+		   << r.tMin << ", tMax=" << r.tMax << ", time=" << r.time << "]";
 		return os;
 	}
 
 	Point3f o;
 	Vec3f dir;
 	mutable float tMax;
+	mutable float tMin;
 	float time;
 };
 
@@ -841,7 +842,7 @@ public:
 
 template <class T>
 inline bool Bounds3<T>::intersectP(const Ray& ray, float* hit_t0, float* hit_t1) const{
-	float t0 = 0, t1 = ray.tMax;
+	float t0 = ray.tMin, t1 = ray.tMax;
 	for(size_t i=0; i<3; ++i){
 		if(ray.dir[i] == 0){
 			if(ray.o[i] < pMin[i] || ray.o[i] > pMax[i])
@@ -884,7 +885,7 @@ bool Bounds3<T>::intersectP(const Ray& ray, const Vec3f& invDir, const bool isDi
 		return false;
 	tMin = (tMin > tzMin ? tMin : tzMin);
 	tMax = (tMax < tzMax ? tMax : tzMax);
-	return (tMin < ray.tMax) && (tMax > 0);
+	return (tMin < ray.tMax) && (tMax > ray.tMin);
 }
 
 

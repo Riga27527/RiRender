@@ -21,14 +21,21 @@ bool Sphere::intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) c
 	// find the smallest positive root
 	float dis_sqrt = std::sqrt(discriminant);
 	float root = (-half_b - dis_sqrt) / a;
-	if(root < 0.f || root > r.tMax){
+	if(root < r.tMin || root > r.tMax){
 		root = (-half_b + dis_sqrt) / a;
-		if(root < 0.f || root > r.tMax)
+		if(root < r.tMin || root > r.tMax)
 			return false;
 	}
 	Point3f pHit = r.at(root);
+	Normal3f normal = Normalize(Normal3f(pHit - Point3f(0.f)));
+	float phi = std::atan2(pHit.y, pHit.x);
+	if(phi < 0)
+		phi += PI * 2;
+	float theta = std::acos(pHit.z / radius);
+	float u = phi / (2 * PI);
+	float v = theta / PI;
 	*tHit = root;
-	// *isect = (*object2World)(SurfaceInteraction(pHit, -r.dir, r.time, this));
+	*isect = (*object2World)(SurfaceInteraction(pHit, normal, -r.dir, r.time, Point2f(u, v), this));
 	return true;
 }
 
@@ -47,9 +54,9 @@ bool Sphere::intersectP(const Ray& ray) const{
 	// find the smallest positive root
 	float dis_sqrt = std::sqrt(discriminant);
 	float root = (-half_b - dis_sqrt) / a;
-	if(root < 0.f || root > r.tMax){
+	if(root < r.tMin || root > r.tMax){
 		root = (-half_b + dis_sqrt) / a;
-		if(root < 0.f || root > r.tMax)
+		if(root < r.tMin || root > r.tMax)
 			return false;
 	}
 	return true;	

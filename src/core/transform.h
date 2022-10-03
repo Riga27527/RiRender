@@ -1,7 +1,8 @@
-
 #pragma once
 
+#include "common.h"
 #include "geometry.h"
+#include "interaction.h"
 #include <string.h>
 
 RIGA_NAMESPACE_BEGIN
@@ -141,8 +142,23 @@ public:
 	    return ret;
 	}
 	Ray operator()(const Ray& r) const{
-		return Ray((*this)(r.o), (*this)(r.dir), r.tMax, r.time);
+		return Ray((*this)(r.o), (*this)(r.dir), r.tMin, r.tMax, r.time);
 	}
+	SurfaceInteraction operator()(const SurfaceInteraction& isec) const{
+		SurfaceInteraction ret;
+		const Transform& t = (*this);
+
+		ret.p = t(isec.p);
+		ret.n = Normalize(t(isec.n));
+		ret.wo = Normalize(t(isec.wo));
+		ret.time = isec.time;
+		ret.uv = isec.uv;
+		ret.shape = isec.shape;
+		ret.shading.n = Normalize(t(isec.shading.n)).faceForward(ret.n);
+		ret.primitive = isec.primitive;
+
+		return ret;
+	} 
 	friend Transform Inverse(const Transform& t){
 		return Transform(t.mInv, t.m);
 	}

@@ -20,6 +20,7 @@ std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_cl
 
 #define MachineEpsilon (std::numeric_limits<float>::epsilon() * 0.5)
 #define Infinity std::numeric_limits<float>::infinity()
+#define RayEpsilon 1e-4
 // #define Epsilon  std::numeric_limits<float>::epsilon()
 
 RIGA_NAMESPACE_BEGIN

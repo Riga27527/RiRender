@@ -1,8 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "shape.h"
-#include "primitive.h"
+#include "geometry.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -14,18 +13,18 @@ struct Interaction{
 	Interaction(const Point3f& p, const Normal3f& n, const Vec3f& wo, float t)
 	: p(p), n(n), wo(wo), time(t){}
 	Ray spawnRay(const Vec3f& d2) const{
-		Point3f o = p + 0.1f * Vec3f(n);
-		return Ray(o, d2, Infinity, time);
+		// Point3f o = p + 0.1f * Vec3f(n);
+		return Ray(p, d2, RayEpsilon, Infinity, time);
 	}
 	Ray spawnRayTo(const Point3f& p2) const{
-		Point3f o = p + 0.1f * Vec3f(n);
-		Vec3f dir = p2 - o;
-		return Ray(o, dir, 1.f-0.00001, time);
+		// Point3f o = p + 0.1f * Vec3f(n);
+		Vec3f dir = p2 - p;
+		return Ray(p, dir, RayEpsilon, 1.f-RayEpsilon, time);
 	}
 	Ray spawnRayTo(const Interaction& inter) const{
-		Point3f o = p + 0.1f * Vec3f(n);
-		Vec3f dir = inter.p - o;
-		return Ray(o, dir, 1.f-0.00001, time);		
+		// Point3f o = p + 0.1f * Vec3f(n);
+		Vec3f dir = inter.p - p;
+		return Ray(p, dir, RayEpsilon, 1.f-RayEpsilon, time);		
 	}
 	float time = 0.f;
 	Point3f p;

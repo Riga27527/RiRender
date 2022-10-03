@@ -53,7 +53,7 @@ void OBJ_loader_BVH_test(int width, int height){
 	Transform lookAt = LookAt(eye, look, up);
 	Transform cam2wor = Inverse(lookAt);
 	float fov = 90.f;
-	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "random_noS.ppm");
+	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "Halton_1center.ppm");
 	std::shared_ptr<Camera> cam(CreatePerspectiveCamera(cam2wor, fov, film.get()));
 
 	// get sampler and integrator

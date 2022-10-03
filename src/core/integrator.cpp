@@ -26,7 +26,7 @@ void SamplerIntegrator::render(const Scene& scene){
 				if(scene.intersect(r, &inter)){
 					Vec3f lightDir = Normalize(light - inter.p);
 					Vec3f normal = Normalize(Vec3f(inter.shading.n));
-					// if(!scene.intersectP(inter.spawnRayTo(light))){
+					if(!scene.intersectP(inter.spawnRayTo(light))){
 						// diff
 						float diff = std::max(Dot(normal, lightDir), 0.f);
 
@@ -34,7 +34,7 @@ void SamplerIntegrator::render(const Scene& scene){
 						Vec3f halfVec = Normalize(lightDir + Normalize(-r.dir));
 						float spec = std::pow(std::max(Dot(halfVec, normal), 0.f), 32.f);
 						Li += Spectrum(0.2 + 0.4 * diff + 0.8 * spec);
-					// }
+					}
 				}
 			}while(pixel_sampler->startNextSample());
 			framebuffer[m++] = Li / (float)pixel_sampler->samplesPerPixel;

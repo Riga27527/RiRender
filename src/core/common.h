@@ -65,6 +65,8 @@ struct CameraSample;
 class ProjectiveCamera;
 class Scene;
 
+class BSDF;
+
 template <class T>
 bool isNaN(const T x){
 	return std::isnan(x);
@@ -115,7 +117,8 @@ inline int CountTrailingZeros(uint32_t v) {
 #endif
 }
 
-inline float gamma(int n){
+inline float Gamma(int n){
 	return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
 }
+
 RIGA_NAMESPACE_END

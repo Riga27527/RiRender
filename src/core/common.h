@@ -66,6 +66,7 @@ class ProjectiveCamera;
 class Scene;
 
 class BSDF;
+class BxDF;
 
 template <class T>
 bool isNaN(const T x){

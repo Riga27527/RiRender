@@ -1176,7 +1176,7 @@ Bounds2<T> Expand(const Bounds2<T>& b, U delta){
 	return Bounds3<T>(b.pMin - Vec2<T>(delta, delta), b.pMax + Vec2<T>(delta, delta));
 }
 
-inline void CoordinateSystem(const Vec3f &a, Vec3f &b, Vec3f &c) {
+inline void CoordinateSystem(const Normal3f &a, Vec3f &b, Vec3f &c) {
     if (std::abs(a.x) > std::abs(a.y)) {
         float invLen = 1.0f / std::sqrt(a.x * a.x + a.z * a.z);
         c = Vec3f(a.z * invLen, 0.0f, -a.x * invLen);
@@ -1188,6 +1188,6 @@ inline void CoordinateSystem(const Vec3f &a, Vec3f &b, Vec3f &c) {
 }
 
 inline Vec3f Reflect(const Vec3f& wo, const Normal3f& n){
-	return 2 * Dot(wo, n) * n - wo;
+	return -wo + Vec3f(2 * Dot(wo, n) * n);
 }
 RIGA_NAMESPACE_END

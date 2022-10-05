@@ -43,7 +43,7 @@ public:
 	Spectrum sample_f(const Vec3f& wo_world, Vec3f* wi_world, const Point2f& u, 
 		float *pdf, BxDFType type = BSDF_ALL) const;
 	
-	float pdf(const Vec3f& wo, const Vec3f& wi, BxDFType flags = BSDF_ALL) const;
+	float pdf(const Vec3f& wo_world, const Vec3f& wi_world, BxDFType flags = BSDF_ALL) const;
 
 	~BSDF();
 
@@ -86,19 +86,4 @@ public:
 private:
 	const Spectrum R;
 };
-
-inline 
-int BSDF::getNumComponents(BxDFType flags) const{
-	int num = 0;
-	for(size_t i=0; i<nBxDFs; ++i)
-		if(bxdfs[i]->matchesFlags(flags))
-			++num;
-	return num;
-}
-
-inline 
-BSDF::~BSDF(){
-	for(size_t i=0; i<nBxDFs; ++i)
-		bxdfs[i]->~BxDF();
-}
 RIGA_NAMESPACE_END

@@ -2,6 +2,19 @@
 
 RIGA_NAMESPACE_BEGIN
 
+int BSDF::getNumComponents(BxDFType flags) const{
+	int num = 0;
+	for(size_t i=0; i<nBxDFs; ++i)
+		if(bxdfs[i]->matchesFlags(flags))
+			++num;
+	return num;
+}
+
+BSDF::~BSDF(){
+	for(size_t i=0; i<nBxDFs; ++i)
+		bxdfs[i]->~BxDF();
+}
+
 Spectrum BSDF::f(const Vec3f& wo_world, const Vec3f& wi_world, 
 	BxDFType flags) const{
 	Vec3f wo = world2Local(wo_world), wi = world2Local(wi_world);
@@ -45,6 +58,7 @@ Spectrum BSDF::sample_f(const Vec3f& wo_world, Vec3f* wi_world, const Point2f& u
 		return Spectrum(0);
 	*wi_world = local2World(wi);
 
+	// get avg pdf
 	if(!(bxdf->type & BSDF_SPECULAR) && matchingComps > 1){
 		for(size_t i=0; i<nBxDFs; ++i)
 			if(bxdfs[i] != bxdf && bxdfs[i]->matchesFlags(type))
@@ -53,6 +67,7 @@ Spectrum BSDF::sample_f(const Vec3f& wo_world, Vec3f* wi_world, const Point2f& u
 	if(matchingComps > 1)
 		*pdf /= matchingComps;
 
+	// get total f
 	if(!(bxdf->type & BSDF_SPECULAR)){
 		f = Spectrum(0.f);
 		bool reflect = Dot(wo_world, ng) * Dot(*wi_world, ng) > 0;
@@ -66,8 +81,21 @@ Spectrum BSDF::sample_f(const Vec3f& wo_world, Vec3f* wi_world, const Point2f& u
 	return f;
 }
 
-float BSDF::pdf(const Vec3f& wo, const Vec3f& wi, BxDFType flags) const{
-	return 0.f;
+float BSDF::pdf(const Vec3f& wo_world, const Vec3f& wi_world, BxDFType flags) const{
+	if(nBxDFs == 0)
+		return 0.f;
+	Vec3f wo = world2Local(wo_world), wi = world2Local(wi_world);
+	if(wo.z == 0)
+		return 0.f;
+	float pdf = 0.f;
+	int matchingComps = 0;
+	for(size_t i=0; i<nBxDFs; ++i){
+		if(bxdfs[i]->matchesFlags(flags)){
+			++matchingComps;
+			pdf += bxdfs[i]->pdf(wo, wi);
+		}
+	}
+	return (matchingComps > 0 ? pdf / matchingComps : 0.f);
 }
 
 

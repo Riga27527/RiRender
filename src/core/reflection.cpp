@@ -1,4 +1,5 @@
 #include "reflection.h"
+#include "sampling.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -98,5 +99,16 @@ float BSDF::pdf(const Vec3f& wo_world, const Vec3f& wi_world, BxDFType flags) co
 	return (matchingComps > 0 ? pdf / matchingComps : 0.f);
 }
 
+Spectrum BxDF::sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf_) const{
+	*wi = square2CosineHemishpere(sample);
+	if(wo.z < 0)
+		wi->z *= -1;
+	*pdf_ = pdf(wo, *wi);
+	return f(wo, *wi);
+}
+
+float BxDF::pdf(const Vec3f& wo, const Vec3f& wi) const{
+	return 0.f;
+}
 
 RIGA_NAMESPACE_END

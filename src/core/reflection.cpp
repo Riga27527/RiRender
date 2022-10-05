@@ -108,7 +108,11 @@ Spectrum BxDF::sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float
 }
 
 float BxDF::pdf(const Vec3f& wo, const Vec3f& wi) const{
-	return 0.f;
+	return SameHemiSphere(wo, wi) ? AbsCosTheta(wi) * INV_PI : 0;
+}
+
+Spectrum LambertianReflection::f(const Vec3f& wo, const Vec3f& wi) const{
+	return R * INV_PI;
 }
 
 RIGA_NAMESPACE_END

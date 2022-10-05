@@ -1176,6 +1176,7 @@ Bounds2<T> Expand(const Bounds2<T>& b, U delta){
 	return Bounds3<T>(b.pMin - Vec2<T>(delta, delta), b.pMax + Vec2<T>(delta, delta));
 }
 
+// construct local coordinateSystem
 inline void CoordinateSystem(const Normal3f &a, Vec3f &b, Vec3f &c) {
     if (std::abs(a.x) > std::abs(a.y)) {
         float invLen = 1.0f / std::sqrt(a.x * a.x + a.z * a.z);
@@ -1187,7 +1188,71 @@ inline void CoordinateSystem(const Normal3f &a, Vec3f &b, Vec3f &c) {
     b = Cross(c, a);
 }
 
+// Local coordinateSystem function
+inline bool SameHemiSphere(const Vec3f& w1, const Vec3f& w2){
+	return w1.z * w2.z > 0;
+}
+inline bool SameHemiSphere(const Vec3f& w, const Normal3f& n){
+	return w.z * n.z > 0;
+}
+
+// cosTheta series
+inline float CosTheta(const Vec3f& w){
+	return w.z;
+}
+inline float Cos2Theta(const Vec3f& w){
+	return w.z * w.z;
+}
+inline float AbsCosTheta(const Vec3f& w){
+	return std::abs(w.z);
+}
+
+// sinTheta series
+inline float Sin2Theta(const Vec3f &w){
+	return std::max(0.f, 1.f - Cos2Theta(w));
+}
+inline float SinTheta(const Vec3f& w){
+	return std::sqrt(Sin2Theta(w));
+}
+
+// tanTheta series
+inline float TanTheta(const Vec3f& w){
+	return SinTheta(w) / CosTheta(w);
+}
+inline float Tan2Theta(const Vec3f& w){
+	return Sin2Theta(w) / Cos2Theta(w);
+}
+
+// cosPhi series
+inline float CosPhi(const Vec3f& w){
+	float sinTheta = SinTheta(w);
+	return (sinTheta == 0) ? 1 : Clamp(w.x / sinTheta, -1.f, 1.f);
+}
+inline float Cos2Phi(const Vec3f& w){
+	return CosPhi(w) * CosPhi(w);
+}
+
+// sinPhi series
+inline float SinPhi(const Vec3f& w){
+	float sinTheta = SinTheta(w);
+	return (sinTheta == 0) ? 0 : Clamp(w.y / sinTheta, -1.f, 1.f);
+}
+inline float Sin2Phi(const Vec3f& w){
+	return SinPhi(w) * SinPhi(w);
+}
+
+// reflect & refract
 inline Vec3f Reflect(const Vec3f& wo, const Normal3f& n){
 	return -wo + Vec3f(2 * Dot(wo, n) * n);
+}
+inline Vec3f Refract(const Vec3f& wi, const Normal3f& n, float eta, Vec3f *wt){
+	float cosThetaI = Dot(wi, n);
+	float sin2ThetaI = std::max(0.f, 1.f - cosThetaI * cosThetaI);
+	float sin2thetaT = eta * eta * sin2ThetaI;
+
+	if(sin2thetaT >= 1.f) return false;
+	float cosThetaT = std::sqrt(1.f - sin2thetaT);
+	*wt = -wi * eta + (eta * cosThetaI - cosThetaT) * Vec3f(n);
+	return true;
 }
 RIGA_NAMESPACE_END

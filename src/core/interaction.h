@@ -2,11 +2,14 @@
 
 #include "common.h"
 #include "geometry.h"
+#include "material.h"
+#include "reflection.h"
 
 RIGA_NAMESPACE_BEGIN
 
 struct Interaction{
 	Interaction(){}
+	virtual ~Interaction(){}
 	Interaction(const Point3f& p, float t) : p(p), time(t){}
 	Interaction(const Point3f& p, const Vec3f& wo, float t)
 	: p(p), wo(wo), time(t){}
@@ -37,7 +40,7 @@ public:
 	SurfaceInteraction(){}
 	SurfaceInteraction(const Point3f& p, const Normal3f& n, const Vec3f& wo, float t, 
 		const Point2f& UV, const Shape* sh);
-	void computeScatteringFunctions();
+	void computeScatteringFunctions(const Ray& ray, TransportMode mode);
 	void setShadingInfo(const Normal3f& shadingNormal);
 
 	const Shape* shape = nullptr;
@@ -46,6 +49,7 @@ public:
 	struct{
 		Normal3f n;
 	}shading;
+	std::unique_ptr<BSDF> bsdf;
 };
 
 RIGA_NAMESPACE_END

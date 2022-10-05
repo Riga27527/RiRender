@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "geometry.h"
-#include "interaction.h"
 #include "spectrum.h"
 
 RIGA_NAMESPACE_BEGIN
@@ -18,10 +17,7 @@ enum BxDFType{
 
 class BSDF{
 public:
-	BSDF(const SurfaceInteraction& isec, float eta = 1.f)
-		:	eta(eta), ns(isec.shading.n), ng(isec.n){
-			CoordinateSystem(ns, ss, ts);
-		} 
+	BSDF(const SurfaceInteraction& isec, float eta = 1.f); 
 	void add(BxDF *b){
 		if(nBxDFs >= MaxBxDFs)
 			throw("The number of BxDF in BSDF is too many!");

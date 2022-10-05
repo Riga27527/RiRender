@@ -1,4 +1,5 @@
 #include "interaction.h"
+#include "primitive.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -10,6 +11,10 @@ SurfaceInteraction::SurfaceInteraction(const Point3f& p, const Normal3f& n,
 
 void SurfaceInteraction::setShadingInfo(const Normal3f& shadingNormal){
 	shading.n = shadingNormal;
+}
+
+void SurfaceInteraction::computeScatteringFunctions(const Ray& ray, TransportMode mode){
+	primitive->computeScatteringFunctions(this, mode);
 }
 
 RIGA_NAMESPACE_END

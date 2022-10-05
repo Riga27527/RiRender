@@ -68,6 +68,10 @@ class Scene;
 class BSDF;
 class BxDF;
 
+class Material;
+template<typename T>
+class Texture;
+
 template <class T>
 bool isNaN(const T x){
 	return std::isnan(x);

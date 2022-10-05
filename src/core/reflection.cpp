@@ -1,7 +1,13 @@
 #include "reflection.h"
 #include "sampling.h"
+#include "interaction.h"
 
 RIGA_NAMESPACE_BEGIN
+
+BSDF::BSDF(const SurfaceInteraction& isec, float eta)
+	: eta(eta), ns(isec.shading.n), ng(isec.n){
+			CoordinateSystem(ns, ss, ts);
+}
 
 int BSDF::getNumComponents(BxDFType flags) const{
 	int num = 0;

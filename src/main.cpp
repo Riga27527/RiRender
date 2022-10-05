@@ -15,6 +15,8 @@
 #include "halton.h"
 #include "integrator.h"
 #include "film.h"
+#include "texture.h"
+#include "material.h"
 
 using namespace riga;
 
@@ -40,10 +42,12 @@ void OBJ_loader_BVH_test(int width, int height){
 
 	// get Aggragate and Scenes
 	std::vector<std::shared_ptr<Primitive>> prims;
+	std::shared_ptr<Texture<Spectrum>> kd = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.6f));
+	std::shared_ptr<Material> mat = std::make_shared<MatteMaterial>(kd);
 	for(size_t i=0; i<tri_mesh.size(); ++i)
-		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]));
+		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i]), mat);
 	for(size_t i=0; i<floor_mesh.size(); ++i)
-		prims.push_back(std::make_shared<GeometricPrimitive>(floor_mesh[i]));	
+		prims.push_back(std::make_shared<GeometricPrimitive>(floor_mesh[i]), mat);	
 	std::unique_ptr<Aggregate> agg = std::make_unique<BVH>(prims);
 	std::unique_ptr<Scene> scene = std::make_unique<Scene>(std::move(agg));
 

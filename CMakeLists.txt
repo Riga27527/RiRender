@@ -27,6 +27,7 @@ file(GLOB source_files CONFIGURE_DEPENDS
 	src/shapes/*
 	src/samplers/*
 	src/textures/*
+	src/lights/*
 	)
 
 include_directories(
@@ -59,6 +60,7 @@ target_include_directories(Rider PUBLIC
 	src/shapes
 	src/samplers
 	src/textures
+	src/lights
 	)
 
 find_package(TBB REQUIRED)

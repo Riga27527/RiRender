@@ -40,7 +40,7 @@ public:
 	SurfaceInteraction(){}
 	SurfaceInteraction(const Point3f& p, const Normal3f& n, const Vec3f& wo, float t, 
 		const Point2f& UV, const Shape* sh);
-	void computeScatteringFunctions(const Ray& ray, TransportMode mode);
+	void computeScatteringFunctions(const Ray& ray, TransportMode mode = TransportMode::Radiance);
 	void setShadingInfo(const Normal3f& shadingNormal);
 
 	const Shape* shape = nullptr;

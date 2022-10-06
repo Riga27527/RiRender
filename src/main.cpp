@@ -17,6 +17,7 @@
 #include "film.h"
 #include "constant.h"
 #include "matte.h"
+#include "point.h"
 
 using namespace riga;
 
@@ -40,16 +41,30 @@ void OBJ_loader_BVH_test(int width, int height){
 	std::vector<std::shared_ptr<Shape>>	floor_mesh = CreateTriangleMesh(&identity, &identity, false, 
 		nTris, nVers, vertexIndex, p, nullptr, nullptr, nullptr);
 
-	// get Aggragate and Scenes
-	std::vector<std::shared_ptr<Primitive>> prims;
+	// Lights
+	Transform light2world_1, light2world_2;
+	light2world_1 = Translate(Vec3f(-2.f, 4.f, -3.f)) * light2world_1;
+	light2world_2 = Translate(Vec3f(2.f, 4.f, -3.f)) * light2world_2;
+	std::shared_ptr<Light> plight1 = std::make_shared<PointLight>(light2world_1, Spectrum(50.f));
+	std::shared_ptr<Light> plight2 = std::make_shared<PointLight>(light2world_2, Spectrum(50.f));
+	std::vector<std::shared_ptr<Light>> lights;
+	lights.push_back(plight1);
+	// lights.push_back(plight2);
+
+	// Materials
 	std::shared_ptr<Texture<Spectrum>> kd = std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.6f));
 	std::shared_ptr<Material> mat = std::make_shared<MatteMaterial>(kd);
+
+	// Primitives
+	std::vector<std::shared_ptr<Primitive>> prims;
 	for(size_t i=0; i<tri_mesh.size(); ++i)
 		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i], mat));
 	for(size_t i=0; i<floor_mesh.size(); ++i)
 		prims.push_back(std::make_shared<GeometricPrimitive>(floor_mesh[i], mat));	
+	
+	// Aggragate and Scenes
 	std::unique_ptr<Aggregate> agg = std::make_unique<BVH>(prims);
-	std::unique_ptr<Scene> scene = std::make_unique<Scene>(std::move(agg));
+	std::unique_ptr<Scene> scene = std::make_unique<Scene>(std::move(agg), lights);
 
 	// get camera
 	Point3f eye(0.f, 0.f, -3.f), look(0.f, 0.f, 0.f);
@@ -57,12 +72,12 @@ void OBJ_loader_BVH_test(int width, int height){
 	Transform lookAt = LookAt(eye, look, up);
 	Transform cam2wor = Inverse(lookAt);
 	float fov = 90.f;
-	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "Halton_1center.ppm");
+	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "Halton_1pointLight.ppm");
 	std::shared_ptr<Camera> cam(CreatePerspectiveCamera(cam2wor, fov, film.get()));
 
 	// get sampler and integrator
 	Bounds2i imageBound(Point2i(0, 0), Point2i(width, height));
-	std::shared_ptr<Sampler> halsamp = std::make_shared<HaltonSampler>(1, imageBound, true);
+	std::shared_ptr<Sampler> halsamp = std::make_shared<HaltonSampler>(2, imageBound, false);
 	std::shared_ptr<Integrator> integrator = std::make_shared<SamplerIntegrator>(cam, halsamp);
 	integrator->render(*scene);
 }

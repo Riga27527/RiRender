@@ -72,6 +72,10 @@ class Material;
 template<typename T>
 class Texture;
 
+class Light;
+class AreaLight;
+class VisibilityTester;
+
 template <class T>
 bool isNaN(const T x){
 	return std::isnan(x);

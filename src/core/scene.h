@@ -7,8 +7,8 @@
 RIGA_NAMESPACE_BEGIN
 class Scene{
 public:
-	Scene(std::unique_ptr<Aggregate> aggregate)
-		: agg(std::move(aggregate)){
+	Scene(std::unique_ptr<Aggregate> aggregate, const std::vector<std::shared_ptr<Light>>& lights)
+		: lights(lights), agg(std::move(aggregate)){
 			sceneBound = agg->worldBound();
 		}
 	const Bounds3f& worldBound() const{
@@ -16,6 +16,8 @@ public:
 	}
 	bool intersect(const Ray& ray, SurfaceInteraction* isect) const;
 	bool intersectP(const Ray& ray) const;
+
+	std::vector<std::shared_ptr<Light>> lights;
 
 private:
 	Bounds3f sceneBound;

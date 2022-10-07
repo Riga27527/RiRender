@@ -17,8 +17,15 @@ public:
 	virtual bool intersectP(const Ray& ray) const{
 		return 	intersect(ray, nullptr, nullptr);
 	}
-	virtual float Area() const = 0;
+	virtual float area() const = 0;
 
+	virtual Interaction sample(const Point2f& u, float *pdf) const = 0;
+	virtual float pdf(const Interaction& ) const{
+		return 1.f / area();
+	}
+
+	virtual Interaction sample(const Interaction& ref, const Point2f& u, float *pdf) const;
+	virtual float pdf(const Interaction& ref, const Vec3f& wi) const;
 
 	const Transform* object2World, *world2Object;
 	const bool reverseOrientation = false;

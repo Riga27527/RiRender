@@ -1,6 +1,7 @@
 #include "triangle.h"
 #include <fstream>
 #include <sstream>
+#include "sampling.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -232,14 +233,36 @@ bool Triangle::intersectP(const Ray& ray) const{
 	return true;
 }
 
-float Triangle::Area() const{
+float Triangle::area() const{
 	const Point3f& v0 = mesh->p[vIndex[0]];
 	const Point3f& v1 = mesh->p[vIndex[1]];
 	const Point3f& v2 = mesh->p[vIndex[2]];
 	return 0.5f * Cross(v1 - v0, v2 - v0).length();
 }
 
-std::vector<std::shared_ptr<Shape>> CreateTriangleMesh(
+Interaction Triangle::sample(const Point2f& u, float *pdf) const{
+	Point2f b = UniformSampleTriangle(u);
+
+	const Point3f& v0 = mesh->p[vIndex[0]];
+	const Point3f& v1 = mesh->p[vIndex[1]];
+	const Point3f& v2 = mesh->p[vIndex[2]];	
+
+	Interaction insect;
+	insect.p = b[0] * v0 + b[1] * v1 + (1.f - b[0] - b[1]) * v2;
+	insect.n = Normalize(Normal3f(Cross(v1 - v0, v2 - v0)));
+
+	if(mesh->n){
+		Normal3f ns(b[0] * mesh->n[vIndex[0]] + b[1] * mesh->n[vIndex[1]] 
+			+ (1.f - b[0] - b[1]) * mesh->n[vIndex[2]]);
+		insect.n.faceForward(ns);
+	}else if(reverseOrientation){
+		insect.n *= -1;
+	}
+	*pdf = 1.f / area();
+	return insect;
+}
+
+std::vector<std::shared_ptr<Shape>> CreateTriangleVector(
 	const Transform* obj2wor, const Transform* wor2obj, bool reverseOrient,
 	int nTris, int nVers, const int* vIndices, const Point3f* P, 
 	const Normal3f* N, const Vec3f* S, const Point2f* UV, const int* fIndices){

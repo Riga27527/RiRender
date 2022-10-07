@@ -85,7 +85,8 @@ public:
 	Bounds3f objectBound() const;
 	bool intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) const;
 	bool intersectP(const Ray& ray) const;
-	float Area() const;
+	float area() const;
+	Interaction sample(const Point2f& u, float *pdf) const;
 
 private:
 	std::shared_ptr<TriangleMesh> mesh;
@@ -93,7 +94,7 @@ private:
 	int faceIndex;
 };
 
-std::vector<std::shared_ptr<Shape>> CreateTriangleMesh(
+std::vector<std::shared_ptr<Shape>> CreateTriangleVector(
 	const Transform* obj2wor, const Transform* wor2obj, bool reverseOrient,
 	int nTris, int nVers, const int* vIndices, const Point3f* P, 
 	const Normal3f* N, const Vec3f* S, const Point2f* UV, const int* fIndices = nullptr);

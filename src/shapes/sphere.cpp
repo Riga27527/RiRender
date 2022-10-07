@@ -62,9 +62,13 @@ bool Sphere::intersectP(const Ray& ray) const{
 	return true;	
 }
 
-float Sphere::Area() const{
+float Sphere::area() const{
 	return 4.f * PI * radius * radius;
 }
 
+Interaction Sphere::sample(const Point2f& u, float *pdf) const{
+	Interaction insect;
+	return insect;
+}
 
 RIGA_NAMESPACE_END

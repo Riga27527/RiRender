@@ -29,7 +29,7 @@ void SamplerIntegrator::render(const Scene& scene){
 					Vec3f wo = inter.wo;
 					for(const auto &light : scene.lights){
 						Vec3f wi;
-						float pdf;
+						float pdf = 0.f;
 						VisibilityTester vis;
 						Spectrum L_light = light->sample_Li(inter, pixel_sampler->get2D(), &wi, &pdf, &vis);
 						if(L_light.isBlack() || pdf == 0.f)

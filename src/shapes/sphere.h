@@ -11,8 +11,8 @@ public:
 	Bounds3f objectBound() const;
 	bool intersect(const Ray& ray, float *tHit, SurfaceInteraction* isect) const;
 	bool intersectP(const Ray& ray) const;
-	float Area() const;
-
+	float area() const;
+	Interaction sample(const Point2f& u, float *pdf) const;
 	
 	float radius;
 };

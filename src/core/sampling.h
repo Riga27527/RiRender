@@ -20,4 +20,11 @@ Vec3f square2CosineHemishpere(const Point2f& sample){
     return Vec3f(std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta)); 
 }
 
+inline
+Point2f UniformSampleTriangle(const Point2f& sample){
+    float tmp = std::sqrt(sample.x);
+    return Point2f(1.f - tmp, sample.y * tmp);
+}
+
+
 RIGA_NAMESPACE_END

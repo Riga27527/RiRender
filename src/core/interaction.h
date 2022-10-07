@@ -42,7 +42,8 @@ public:
 		const Point2f& UV, const Shape* sh);
 	void computeScatteringFunctions(const Ray& ray, TransportMode mode = TransportMode::Radiance);
 	void setShadingInfo(const Normal3f& shadingNormal);
-
+	Spectrum Le(const Vec3f& w) const;
+	
 	const Shape* shape = nullptr;
 	const Primitive* primitive = nullptr;
 	Point2f uv;

@@ -1,5 +1,6 @@
 #include "interaction.h"
 #include "primitive.h"
+#include "light.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -17,4 +18,8 @@ void SurfaceInteraction::computeScatteringFunctions(const Ray& ray, TransportMod
 	primitive->computeScatteringFunctions(this, mode);
 }
 
+Spectrum SurfaceInteraction::Le(const Vec3f& w) const{
+	AreaLight* light = primitive->getAreaLight();
+	return light ? light->L(*this, w) : Spectrum(0.f);
+}
 RIGA_NAMESPACE_END

@@ -27,6 +27,7 @@ void SamplerIntegrator::render(const Scene& scene){
 					inter.computeScatteringFunctions(r);
 					Vec3f normal = Normalize(Vec3f(inter.shading.n));
 					Vec3f wo = inter.wo;
+					Li += inter.Le(wo);
 					for(const auto &light : scene.lights){
 						Vec3f wi;
 						float pdf = 0.f;

@@ -16,23 +16,28 @@ public:
 	virtual bool intersectP(const Ray& ray) const = 0;
 	virtual void computeScatteringFunctions(
 		SurfaceInteraction* isect, TransportMode mode) const = 0;
-
+	virtual	AreaLight* getAreaLight() const = 0;
+	virtual Material* getMaterial() const = 0;
 };
 
 
 class GeometricPrimitive : public Primitive{
 public:
-	GeometricPrimitive(const std::shared_ptr<Shape>& shape, const std::shared_ptr<Material>& mat) 
-		: shape(shape), material(mat){};
+	GeometricPrimitive(
+		const std::shared_ptr<Shape>& shape, const std::shared_ptr<Material>& mat, const std::shared_ptr<AreaLight>& light = nullptr) 
+		: shape(shape), material(mat), areaLight(light){};
 	Bounds3f worldBound() const;
 	bool intersect(const Ray& ray, SurfaceInteraction* isect) const;
 	bool intersectP(const Ray& ray) const;
+	AreaLight* getAreaLight() const;
+	Material* getMaterial() const;
 	void computeScatteringFunctions(
 		SurfaceInteraction* isect, TransportMode mode) const;
 
 private:
 	std::shared_ptr<Shape> shape;
 	std::shared_ptr<Material> material;
+	std::shared_ptr<AreaLight> areaLight;
 };
 
 class Aggregate{

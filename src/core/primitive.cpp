@@ -27,4 +27,13 @@ void GeometricPrimitive::computeScatteringFunctions(SurfaceInteraction* isect, T
 		throw("Shaing normal and geometry normal are not in a same hemiSphere!");
 }
 
+AreaLight* GeometricPrimitive::getAreaLight() const{
+	return areaLight.get();
+}
+
+Material* GeometricPrimitive::getMaterial() const{
+	return material.get();
+}
+
+
 RIGA_NAMESPACE_END

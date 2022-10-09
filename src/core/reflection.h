@@ -15,6 +15,10 @@ enum BxDFType{
 	BSDF_ALL = BSDF_DIFFUSE | BSDF_GLOSSY | BSDF_SPECULAR | BSDF_REFLECTION | BSDF_TRANSMISSION,
 };
 
+float FrDielectric(float cosThetaI, float etaI, float etaT);
+
+Spectrum FrConductor(float cosThetaI, const Spectrum& etaI, const Spectrum& etaT, const Spectrum& k);
+
 class BSDF{
 public:
 	BSDF(const SurfaceInteraction& isec, float eta = 1.f); 
@@ -82,4 +86,47 @@ public:
 private:
 	const Spectrum R;
 };
+
+
+class Fresnel{
+public:
+	virtual ~Fresnel();
+	virtual Spectrum evaluate(float cosThetaI) const = 0;
+	virtual std::string toString() const = 0;
+};
+
+class FresnelConductor : public Fresnel{
+public:
+	Spectrum evaluate(float cosThetaI) const;
+	FresnelConductor(const Spectrum& etaI, const Spectrum& etaT, const Spectrum& k)
+		: etaI(etaI), etaT(etaT), k(k){}
+
+private:
+	Spectrum etaI, etaT, k;
+};
+
+class FresnelDielectric : public Fresnel{
+public:
+	Spectrum evaluate(float cosThetaI) const;
+	FresnelDielectric(float etaI, float etaT)
+		: etaI(etaI), etaT(etaT){}
+private:
+	float etaI, etaT;
+};
+
+class FresnelNoOp : public Fresnel{
+public:
+	Spectrum evaluate(float) const {
+		return Spectrum(1.f);
+	}
+};
+
+class SpecularReflection : public BxDF{
+public:
+
+private:
+	const Spectrum R;
+	const Fresnel* fresnel;
+};
+
 RIGA_NAMESPACE_END

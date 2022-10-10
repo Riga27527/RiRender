@@ -47,4 +47,38 @@ void SamplerIntegrator::render(const Scene& scene){
 	camera->film->write2PPM(framebuffer);
 }
 
+Spectrum SamplerIntegrator::specularReflec(const Ray& ray, const SurfaceInteraction& isec, 
+	const Scene& scene, Sampler& sampler, int depth) const{
+	Vec3f wo = isec.wo, wi;
+	float pdf;
+
+	BxDFType type = BxDFType(BSDF_REFLECTION | BSDF_SPECULAR);
+	Spectrum f = isec.bsdf->sample_f(wo, &wi, sampler.get2D(), &pdf, type);
+
+	const Normal3f& ns = isec.shading.n;
+	if(pdf > 0.f && !f.isBlack() && AbsDot(wi, ns) != 0.f){
+		Ray rd = ray.spawnRay(wi);
+		return f * Li(rd, scene, sampler, depth+1) * AbsDot(wi, ns) / pdf;
+	}else
+		return Spectrum(0.f);
+}
+
+Spectrum SamplerIntegrator::specularTransmit(const Ray& ray, const SurfaceInteraction& isec, 
+	const Scene& scene, Sampler& sampler, int depth) const{
+	Vec3f wo = isec.wo, wi;
+	float pdf;
+
+	BxDFType type = BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR);
+	Spectrum f = isec.bsdf->sample_f(wo, &wi, sampler.get2D(), &pdf, type);
+
+	const Normal3f& ns = isec.shading.n;
+	if(pdf > 0.f && !f.isBlack() && AbsDot(wi, ns) != 0.f){
+		Ray rd = ray.spawnRay(wi);
+		return f * Li(rd, scene, sampler, depth+1) * AbsDot(wi, ns) / pdf;
+	}else
+		return Spectrum(0.f);
+}
+
+
+
 RIGA_NAMESPACE_END

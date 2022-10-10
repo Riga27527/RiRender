@@ -94,7 +94,7 @@ public:
 			ret.c[i] *= a;
 		return ret;		
 	}
-	CoefficientSpectrum& operator*=(float a) const{
+	CoefficientSpectrum& operator*=(float a){
 		for(size_t i=0; i<nSamples; ++i)
 			c[i] *= a;
 		return *this;		
@@ -107,7 +107,7 @@ public:
 			ret.c[i] /= a;
 		return ret;		
 	}
-	CoefficientSpectrum& operator/=(float a) const{
+	CoefficientSpectrum& operator/=(float a){
 		if(a == 0.f)
 			throw("divide zero in CoefficientSpectrum!");	
 		for(size_t i=0; i<nSamples; ++i)

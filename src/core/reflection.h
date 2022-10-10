@@ -3,6 +3,7 @@
 #include "common.h"
 #include "geometry.h"
 #include "spectrum.h"
+#include "material.h"
 
 RIGA_NAMESPACE_BEGIN
 
@@ -90,9 +91,9 @@ private:
 
 class Fresnel{
 public:
-	virtual ~Fresnel();
+	virtual ~Fresnel(){};
 	virtual Spectrum evaluate(float cosThetaI) const = 0;
-	virtual std::string toString() const = 0;
+	// virtual std::string toString() const = 0;
 };
 
 class FresnelConductor : public Fresnel{
@@ -123,10 +124,54 @@ public:
 
 class SpecularReflection : public BxDF{
 public:
-
+	SpecularReflection(const Spectrum& R, std::unique_ptr<Fresnel> fres)
+		: BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)), R(R), fresnel(std::move(fres)){}
+	Spectrum f(const Vec3f& wo, const Vec3f& wi) const{
+		return Spectrum(0.f);
+	}
+	Spectrum sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const;
+	float pdf(const Vec3f& wo, const Vec3f& wi) const{
+		return 0.f;
+	}
 private:
 	const Spectrum R;
-	const Fresnel* fresnel;
+	const std::unique_ptr<Fresnel> fresnel;
 };
 
+class SpecularTransmission : public BxDF{
+public:
+	SpecularTransmission(const Spectrum& T, float etaA, float etaB, TransportMode mode)
+		: BxDF(BxDFType(BSDF_TRANSMISSION | BSDF_SPECULAR)), T(T), etaA(etaA), etaB(etaB),
+		  fresnel(etaA, etaB), mode(mode){}
+	Spectrum f(const Vec3f& wo, const Vec3f& wi) const{
+		return Spectrum(0.f);
+	}
+	Spectrum sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const;
+	float pdf(const Vec3f& wo, const Vec3f& wi) const{
+		return 0.f;
+	}
+private:
+	const Spectrum T;
+	const float etaA, etaB;
+	const FresnelDielectric fresnel;
+	const TransportMode mode;
+};
+
+class FresnelSpecular : public BxDF{
+public:
+	FresnelSpecular(const Spectrum& R, const Spectrum& T, float etaA, float etaB, TransportMode mode)
+		: BxDF(BxDFType(BSDF_REFLECTION | BSDF_TRANSMISSION | BSDF_SPECULAR)), 
+		  R(R), T(T), etaA(etaA), etaB(etaB), mode(mode){}
+	Spectrum f(const Vec3f& wo, const Vec3f& wi) const{
+		return Spectrum(0.f);
+	}
+	Spectrum sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const;
+	float pdf(const Vec3f& wo, const Vec3f& wi) const{
+		return 0.f;
+	}
+private:
+	const Spectrum R, T;
+	const float etaA, etaB;
+	const TransportMode mode;
+};
 RIGA_NAMESPACE_END

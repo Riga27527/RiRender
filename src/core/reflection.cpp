@@ -5,7 +5,7 @@
 RIGA_NAMESPACE_BEGIN
 
 // BxDF Utility Functions
-Float FrDielectric(Float cosThetaI, Float etaI, Float etaT) {
+float FrDielectric(float cosThetaI, float etaI, float etaT) {
     cosThetaI = Clamp(cosThetaI, -1, 1);
     // Potentially swap indices of refraction
     bool entering = cosThetaI > 0.f;
@@ -15,28 +15,28 @@ Float FrDielectric(Float cosThetaI, Float etaI, Float etaT) {
     }
 
     // Compute _cosThetaT_ using Snell's law
-    Float sinThetaI = std::sqrt(std::max((Float)0, 1 - cosThetaI * cosThetaI));
-    Float sinThetaT = etaI / etaT * sinThetaI;
+    float sinThetaI = std::sqrt(std::max((float)0, 1 - cosThetaI * cosThetaI));
+    float sinThetaT = etaI / etaT * sinThetaI;
 
     // Handle total internal reflection
     if (sinThetaT >= 1) return 1;
-    Float cosThetaT = std::sqrt(std::max((Float)0, 1 - sinThetaT * sinThetaT));
-    Float Rparl = ((etaT * cosThetaI) - (etaI * cosThetaT)) /
+    float cosThetaT = std::sqrt(std::max((float)0, 1 - sinThetaT * sinThetaT));
+    float Rparl = ((etaT * cosThetaI) - (etaI * cosThetaT)) /
                   ((etaT * cosThetaI) + (etaI * cosThetaT));
-    Float Rperp = ((etaI * cosThetaI) - (etaT * cosThetaT)) /
+    float Rperp = ((etaI * cosThetaI) - (etaT * cosThetaT)) /
                   ((etaI * cosThetaI) + (etaT * cosThetaT));
     return (Rparl * Rparl + Rperp * Rperp) / 2;
 }
 
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-Spectrum FrConductor(Float cosThetaI, const Spectrum &etai,
+Spectrum FrConductor(float cosThetaI, const Spectrum &etai,
                      const Spectrum &etat, const Spectrum &k) {
     cosThetaI = Clamp(cosThetaI, -1, 1);
     Spectrum eta = etat / etai;
     Spectrum etak = k / etai;
 
-    Float cosThetaI2 = cosThetaI * cosThetaI;
-    Float sinThetaI2 = 1. - cosThetaI2;
+    float cosThetaI2 = cosThetaI * cosThetaI;
+    float sinThetaI2 = 1. - cosThetaI2;
     Spectrum eta2 = eta * eta;
     Spectrum etak2 = etak * etak;
 
@@ -44,7 +44,7 @@ Spectrum FrConductor(Float cosThetaI, const Spectrum &etai,
     Spectrum a2plusb2 = Sqrt(t0 * t0 + 4 * eta2 * etak2);
     Spectrum t1 = a2plusb2 + cosThetaI2;
     Spectrum a = Sqrt(0.5f * (a2plusb2 + t0));
-    Spectrum t2 = (Float)2 * cosThetaI * a;
+    Spectrum t2 = (float)2 * cosThetaI * a;
     Spectrum Rs = (t1 - t2) / (t1 + t2);
 
     Spectrum t3 = cosThetaI2 * a2plusb2 + sinThetaI2 * sinThetaI2;
@@ -52,6 +52,59 @@ Spectrum FrConductor(Float cosThetaI, const Spectrum &etai,
     Spectrum Rp = Rs * (t3 - t4) / (t3 + t4);
 
     return 0.5 * (Rp + Rs);
+}
+
+Spectrum FresnelConductor::evaluate(float cosThetaI) const{
+	return FrConductor(cosThetaI, etaI, etaT, k);
+}
+
+Spectrum FresnelDielectric::evaluate(float cosThetaI) const{
+	return FrDielectric(cosThetaI, etaI, etaT);
+}
+
+Spectrum SpecularReflection::sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const{
+	*wi = Vec3f(-wo.x, -wo.y, wo.z);
+	*pdf = 1;
+	return fresnel->evaluate(CosTheta(*wi)) * R / AbsCosTheta(*wi);
+}
+
+Spectrum SpecularTransmission::sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const{
+	bool entering = CosTheta(wo) > 0;
+	float etaI = entering ? etaA : etaB;
+	float etaT = entering ? etaB : etaA;
+
+	if(!Refract(wo, Normal3f(0.f, 0.f, 1.f).faceForward(wo), etaI / etaT, wi))
+		return Spectrum(0.f);
+	
+	*pdf = 1;
+	Spectrum ft = T * (Spectrum(1.f) - fresnel.evaluate(CosTheta(*wi)));
+
+	if(mode == TransportMode::Radiance)
+		ft *= (etaI * etaI) / (etaT * etaT);
+	return ft / AbsCosTheta(*wi);
+}
+
+Spectrum FresnelSpecular::sample_f(const Vec3f& wo, Vec3f* wi, const Point2f& sample, float* pdf) const{
+	float F = FrDielectric(CosTheta(wo), etaA, etaB);
+	if(sample[0] < F){
+		*wi = Vec3f(-wo.x, -wo.y, wo.z);
+		*pdf = F;
+		return F * R / AbsCosTheta(*wi);
+	}else{
+		bool entering = CosTheta(wo) > 0;
+		float etaI = entering ? etaA : etaB;
+		float etaT = entering ? etaB : etaA;
+
+		if(!Refract(wo, Normal3f(0.f, 0.f, 1.f).faceForward(wo), etaI / etaT, wi))
+			return Spectrum(0.f);
+		
+		*pdf = 1 - F;
+		Spectrum ft = T * (1.f - F);
+
+		if(mode == TransportMode::Radiance)
+			ft *= (etaI * etaI) / (etaT * etaT);
+		return ft / AbsCosTheta(*wi);
+	}
 }
 
 BSDF::BSDF(const SurfaceInteraction& isec, float eta)

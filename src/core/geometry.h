@@ -1245,7 +1245,7 @@ inline float Sin2Phi(const Vec3f& w){
 inline Vec3f Reflect(const Vec3f& wo, const Normal3f& n){
 	return -wo + Vec3f(2 * Dot(wo, n) * n);
 }
-inline Vec3f Refract(const Vec3f& wi, const Normal3f& n, float eta, Vec3f *wt){
+inline bool Refract(const Vec3f& wi, const Normal3f& n, float eta, Vec3f *wt){
 	float cosThetaI = Dot(wi, n);
 	float sin2ThetaI = std::max(0.f, 1.f - cosThetaI * cosThetaI);
 	float sin2thetaT = eta * eta * sin2ThetaI;

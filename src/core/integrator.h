@@ -16,7 +16,7 @@ public:
 	SamplerIntegrator(std::shared_ptr<const Camera> cam, std::shared_ptr<Sampler> samp)
 	: camera(cam), sampler(samp){}
 	
-	Spectrum specularReflec(const Ray& ray, const SurfaceInteraction& isec, 
+	Spectrum specularReflect(const Ray& ray, const SurfaceInteraction& isec, 
 		const Scene& scene, Sampler& sampler, int depth) const;
 	Spectrum specularTransmit(const Ray& ray, const SurfaceInteraction& isec, 
 		const Scene& scene, Sampler& sampler, int depth) const;

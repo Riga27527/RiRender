@@ -15,39 +15,20 @@ void SamplerIntegrator::render(const Scene& scene){
 			std::unique_ptr<Sampler> pixel_sampler = sampler->clone(offset);
 			Point2i pixel(j, i);
 			pixel_sampler->startPixel(pixel);
-			Spectrum Li(0.f);
+			Spectrum L(0.f);
 			do{
 				CameraSample cs = pixel_sampler->getCameraSample(pixel);
-				// CameraSample cs;
-				// cs.samplePoints = Point2f(j + random_float(), i + random_float());
 				Ray r;
 				camera->generateRay(cs, &r);
-				SurfaceInteraction inter;
-				if(scene.intersect(r, &inter)){
-					inter.computeScatteringFunctions(r);
-					Vec3f normal = Normalize(Vec3f(inter.shading.n));
-					Vec3f wo = inter.wo;
-					Li += inter.Le(wo);
-					for(const auto &light : scene.lights){
-						Vec3f wi;
-						float pdf = 0.f;
-						VisibilityTester vis;
-						Spectrum L_light = light->sample_Li(inter, pixel_sampler->get2D(), &wi, &pdf, &vis);
-						if(L_light.isBlack() || pdf == 0.f)
-							continue;
-						Spectrum f = inter.bsdf->f(wo, wi);
-						if(!f.isBlack() && vis.unoccluded(scene))
-							Li += f * L_light * AbsDot(wi, normal) / pdf;
-					}
-				}
+				L += Li(r, scene, *pixel_sampler);
 			}while(pixel_sampler->startNextSample());
-			framebuffer[m++] = Li / (float)pixel_sampler->samplesPerPixel;
+			framebuffer[m++] = L / (float)pixel_sampler->samplesPerPixel;
 		}
 	}
 	camera->film->write2PPM(framebuffer);
 }
 
-Spectrum SamplerIntegrator::specularReflec(const Ray& ray, const SurfaceInteraction& isec, 
+Spectrum SamplerIntegrator::specularReflect(const Ray& ray, const SurfaceInteraction& isec, 
 	const Scene& scene, Sampler& sampler, int depth) const{
 	Vec3f wo = isec.wo, wi;
 	float pdf;
@@ -57,8 +38,8 @@ Spectrum SamplerIntegrator::specularReflec(const Ray& ray, const SurfaceInteract
 
 	const Normal3f& ns = isec.shading.n;
 	if(pdf > 0.f && !f.isBlack() && AbsDot(wi, ns) != 0.f){
-		Ray rd = ray.spawnRay(wi);
-		return f * Li(rd, scene, sampler, depth+1) * AbsDot(wi, ns) / pdf;
+		Ray rd = isec.spawnRay(wi);
+		return f * Li(rd, scene, sampler, depth + 1) * AbsDot(wi, ns) / pdf;
 	}else
 		return Spectrum(0.f);
 }
@@ -73,8 +54,8 @@ Spectrum SamplerIntegrator::specularTransmit(const Ray& ray, const SurfaceIntera
 
 	const Normal3f& ns = isec.shading.n;
 	if(pdf > 0.f && !f.isBlack() && AbsDot(wi, ns) != 0.f){
-		Ray rd = ray.spawnRay(wi);
-		return f * Li(rd, scene, sampler, depth+1) * AbsDot(wi, ns) / pdf;
+		Ray rd = isec.spawnRay(wi);
+		return f * Li(rd, scene, sampler, depth + 1) * AbsDot(wi, ns) / pdf;
 	}else
 		return Spectrum(0.f);
 }

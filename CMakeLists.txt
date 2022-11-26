@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDRAD 17)
 set(CMAKE_CXX_STANDRAD_REQUIRED ON)
 
 project(Rider LANGUAGES CXX C)
-add_subdirectory(ext ext_build)
 
 if (PROJECT_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
 	message(WARNING "The binary directory of CMake cannot be the same as source directory!")
@@ -17,22 +16,6 @@ endif()
 if(WIN32)
 	add_definitions(-DNOMINMAX -D_USE_MATH_DEFINES)
 endif()
-
-file(GLOB source_files CONFIGURE_DEPENDS 
-	src/accelerators/*
-	src/cameras/*
-	src/core/*
-	src/integrators/*
-	src/materials/*
-	src/shapes/*
-	src/samplers/*
-	src/textures/*
-	src/lights/*
-	)
-
-include_directories(
-	${PCG32_INCLUDE_DIR}
-)
 
 INCLUDE (CheckCXXSourceCompiles)
 INCLUDE (CheckCXXSourceRuns)
@@ -50,18 +33,8 @@ ELSE ()
   ADD_DEFINITIONS ( -D RIDER_NOINLINE )
 ENDIF ()
 
-add_executable(Rider src/main.cpp ${source_files})
-target_include_directories(Rider PUBLIC
-	src/accelerators
-	src/cameras
-	src/core
-	src/integrators
-	src/materials
-	src/shapes
-	src/samplers
-	src/textures
-	src/lights
-	)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-find_package(TBB REQUIRED)
-target_link_libraries(Rider PUBLIC TBB::tbb)
+add_subdirectory(src)

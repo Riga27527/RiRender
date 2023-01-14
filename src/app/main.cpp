@@ -37,7 +37,7 @@ void OBJ_loader_BVH_test(int width, int height){
 	std::shared_ptr<Material> floor_mat = std::make_shared<MatteMaterial>(floor_kd);
 
 	std::shared_ptr<Texture<Spectrum>> mirror_kd 
-		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum(1.f));
+		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.7f));
 	std::shared_ptr<Material> mirror_mat = std::make_shared<MirrorMaterial>(mirror_kd);
 
 	float red_color[3] = {0.9f, 0.05f, 0.05f};
@@ -50,8 +50,9 @@ void OBJ_loader_BVH_test(int width, int height){
 		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum::fromRGB(green_color));
 	std::shared_ptr<Material> green_mat = std::make_shared<MatteMaterial>(green_kd);
 
+	float light_color[3] = {0.98f, 0.98f, 0.98f};
 	std::shared_ptr<Texture<Spectrum>> light_kd 
-		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.98f));
+		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum::fromRGB(light_color));
 	std::shared_ptr<Material> light_mat = std::make_shared<MatteMaterial>(light_kd);	
 
 	// Primitives
@@ -59,7 +60,7 @@ void OBJ_loader_BVH_test(int width, int height){
 
 	// get Obj Mesh
 	Transform Tri_obj2wor, Tri_wor2obj;
-	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 0.f)) * RotateY(180) * Scale(Vec3f(8.f, 8.f, 8.f));
+	Tri_obj2wor = Tri_obj2wor * Translate(Vec3f(0.f, -1.5f, 1.2f)) * RotateY(180) * Scale(Vec3f(10.f, 10.f, 10.f));
 	Tri_wor2obj = Inverse(Tri_obj2wor);
 	std::string obj_path("/home/riga/Rider/scenes/obj/bunny.obj"); 
 	std::vector<std::shared_ptr<Shape>> tri_mesh =
@@ -85,18 +86,18 @@ void OBJ_loader_BVH_test(int width, int height){
 	// get left Wall Mesh
 	int nTris_left = 2;
 	int nVers_left = 4;
-	const float xPos = -4.f; 
+	const float xPos = -3.f; 
 	Point3f p_left[] = {Point3f(xPos, 6.f, 6.f), Point3f(xPos, -6.f, 6.f), 
 				Point3f(xPos, -6.f, -6.f), Point3f(xPos, 6.f, -6.f)};
 	const int vertexIndex_left[6] = {0, 1, 2, 2, 3, 0};
-	std::vector<std::shared_ptr<Shape>>	left_wall_mesh = CreateTriangleVector(&identity, &identity, false, 
+	std::vector<std::shared_ptr<Shape>>	left_wall_mesh = CreateTriangleVector(&identity, &identity, true, 
 		nTris_left, nVers_left, vertexIndex_left, p_left, nullptr, nullptr, nullptr);
 	for(size_t i=0; i<left_wall_mesh.size(); ++i)
 		prims.push_back(std::make_shared<GeometricPrimitive>(left_wall_mesh[i], red_mat));
 
 	// get Right Wall Mesh
 	Transform left2right_obj2wor, left2right_wor2obj;
-	left2right_obj2wor = Translate(Vec3f(8.f, 0.f, 0.f)) * left2right_obj2wor;
+	left2right_obj2wor = Translate(Vec3f(6.f, 0.f, 0.f)) * left2right_obj2wor;
 	left2right_wor2obj = Inverse(left2right_obj2wor);
 	std::vector<std::shared_ptr<Shape>>	right_wall_mesh = CreateTriangleVector(
 		&left2right_obj2wor, &left2right_wor2obj, false, nTris_left, nVers_left, vertexIndex_left, p_left, 
@@ -107,7 +108,7 @@ void OBJ_loader_BVH_test(int width, int height){
 	// get front Wall Mesh
 	int nTris_front = 2;
 	int nVers_front = 4;
-	const float zPos = -4.f; 
+	const float zPos = 3.f; 
 	Point3f p_front[] = {Point3f(-6.f, 6.f, zPos), Point3f(-6.f, -6.f, zPos), 
 				Point3f(6.f, -6.f, zPos), Point3f(6.f, 6.f, zPos)};
 	const int vertexIndex_front[6] = {0, 1, 2, 2, 3, 0};
@@ -116,9 +117,9 @@ void OBJ_loader_BVH_test(int width, int height){
 	for(size_t i=0; i<front_wall_mesh.size(); ++i)
 		prims.push_back(std::make_shared<GeometricPrimitive>(front_wall_mesh[i], floor_mat));
 
-	// get Cell Mesh
+	// get Ceil Mesh
 	Transform bottom2top_obj2wor, bottom2top_wor2obj;
-	bottom2top_obj2wor = Translate(Vec3f(0.f, 8.f, 0.f)) * bottom2top_obj2wor;
+	bottom2top_obj2wor = Translate(Vec3f(0.f, 6.f, 0.f)) * bottom2top_obj2wor;
 	bottom2top_wor2obj = Inverse(bottom2top_obj2wor);
 	std::vector<std::shared_ptr<Shape>>	cell_mesh = CreateTriangleVector(
 		&bottom2top_obj2wor, &bottom2top_wor2obj, true, 
@@ -138,16 +139,17 @@ void OBJ_loader_BVH_test(int width, int height){
 	// Area Lights	
 	int nTrisLight = 2;
 	int nVersLight = 4;
-	const float yPosLight = 5.f; 
-	Point3f pLight[] = {Point3f(-2.f, yPosLight, -4.f), Point3f(-2.f, yPosLight, 0.f), 
-				Point3f(2.f, yPosLight, 0.f), Point3f(2.f, yPosLight, -4.f)};
-	const int vtxIdxLight[6] = {0, 1, 2, 2, 3, 0};
-	std::vector<std::shared_ptr<Shape>>	areaLight_mesh = CreateTriangleVector(&identity, &identity, true, 
+	const float yPosLight = 2.8f; 
+	Point3f pLight[] = {Point3f(-0.8f, yPosLight, 1.8f), Point3f(-0.8f, yPosLight, 0.2f), 
+				Point3f(0.8f, yPosLight, 0.2f), Point3f(0.8f, yPosLight, 1.8f)};
+	const int vtxIdxLight[6] = {0, 3, 2, 2, 1, 0};
+	std::vector<std::shared_ptr<Shape>>	areaLight_mesh = CreateTriangleVector(&identity, &identity, false, 
 		nTris, nVers, vertexIndex, pLight, nullptr, nullptr, nullptr);
 	for(const auto& tri : areaLight_mesh){
-		std::shared_ptr<AreaLight> areaLight = std::make_shared<DiffuseAreaLight>(identity, Spectrum(20.f), 5, tri, false);
+		std::shared_ptr<AreaLight> areaLight = std::make_shared<DiffuseAreaLight>(identity, Spectrum(30.f), 5, tri, false);
 		lights.push_back(areaLight);
-		prims.push_back(std::make_shared<GeometricPrimitive>(tri, light_mat, areaLight));	
+		auto lit_prim = std::make_shared<GeometricPrimitive>(tri, light_mat, areaLight);
+		prims.push_back(lit_prim);	
 	}
 		
 	// Aggragate and Scenes
@@ -160,18 +162,19 @@ void OBJ_loader_BVH_test(int width, int height){
 	Transform lookAt = LookAt(eye, look, up);
 	Transform cam2wor = Inverse(lookAt);
 	float fov = 90.f;
-	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "whitted_test.ppm");
+	std::unique_ptr<Film> film = std::make_unique<Film>(Point2i(width, height), "whitted_test_mirror.ppm");
 	std::shared_ptr<Camera> cam(CreatePerspectiveCamera(cam2wor, fov, film.get()));
 
 	// get sampler and integrator
 	Bounds2i imageBound(Point2i(0, 0), Point2i(width, height));
-	std::shared_ptr<Sampler> halsamp = std::make_shared<HaltonSampler>(5, imageBound, false);
-	std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(8, cam, halsamp);
+	std::shared_ptr<Sampler> halsamp = std::make_shared<HaltonSampler>(64, imageBound, false);
+	std::shared_ptr<Integrator> integrator = std::make_shared<WhittedIntegrator>(5, cam, halsamp);
 	integrator->render(*scene);
 }
 
 int main(int argc, char const *argv[])
 {
+	// **********************LEFT HAND COORDINATE**********************************
 	std::cout << "Hello Rider!" << std::endl;
 	OBJ_loader_BVH_test(800, 800);
 	return 0;

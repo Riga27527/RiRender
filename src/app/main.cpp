@@ -21,6 +21,7 @@
 #include <lights/diffuse.h>
 #include <integrators/whitted.h>
 #include <materials/mirror.h>
+#include <materials/glass.h>
 
 using namespace riga;
 
@@ -55,6 +56,11 @@ void OBJ_loader_BVH_test(int width, int height){
 		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum::fromRGB(light_color));
 	std::shared_ptr<Material> light_mat = std::make_shared<MatteMaterial>(light_kd);	
 
+	std::shared_ptr<Texture<Spectrum>> white_kd 
+		= std::make_shared<ConstantTexture<Spectrum>>(Spectrum(0.95f));
+	std::shared_ptr<Texture<float>> eta = std::make_shared<ConstantTexture<float>>(1.4f);
+	std::shared_ptr<Material> glass_mat = std::make_shared<GlassMaterial>(white_kd, white_kd, eta);
+
 	// Primitives
 	std::vector<std::shared_ptr<Primitive>> prims;
 
@@ -66,7 +72,7 @@ void OBJ_loader_BVH_test(int width, int height){
 	std::vector<std::shared_ptr<Shape>> tri_mesh =
 		CreateOBJMesh(&Tri_obj2wor, &Tri_wor2obj, false, obj_path);
 	for(size_t i=0; i<tri_mesh.size(); ++i)
-		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i], bunny_mat));
+		prims.push_back(std::make_shared<GeometricPrimitive>(tri_mesh[i], glass_mat));
 
 	// get Floor Mesh
 	int nTris = 2;
